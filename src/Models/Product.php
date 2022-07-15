@@ -4,6 +4,7 @@ namespace Motomedialab\Checkout\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Motomedialab\Checkout\Casts\PricingCast;
 use Motomedialab\Checkout\Enums\OrderStatus;
 use Motomedialab\Checkout\Helpers\Money;
@@ -19,6 +20,8 @@ use Motomedialab\Checkout\Helpers\PriceHelper;
  */
 class Product extends Model
 {
+    use SoftDeletes;
+    
     protected $guarded = [];
     
     protected $casts = [
@@ -32,7 +35,7 @@ class Product extends Model
     {
         parent::__construct($attributes);
         
-        $this->table = config('checkout.tables.products');
+        $this->setTable(config('checkout.tables.products'));
     }
     
     /**
@@ -53,9 +56,9 @@ class Product extends Model
      *
      * @param  string  $currency
      *
-     * @return Money
+     * @return Money|null
      */
-    public function price(string $currency): Money
+    public function price(string $currency): Money|null
     {
         if ($this->parent) {
             return $this->parent->price($currency)->add(
@@ -71,9 +74,9 @@ class Product extends Model
      *
      * @param  string  $currency
      *
-     * @return Money
+     * @return Money|null
      */
-    public function shipping(string $currency): Money
+    public function shipping(string $currency): Money|null
     {
         return $this->shipping->get($currency);
     }

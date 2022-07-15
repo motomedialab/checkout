@@ -3,6 +3,8 @@
 namespace Motomedialab\Checkout;
 
 use Illuminate\Support\ServiceProvider;
+use Motomedialab\Checkout\Actions\ValidateVoucher;
+use Motomedialab\Checkout\Contracts\ValidatesVoucher;
 
 class CheckoutServiceProvider extends ServiceProvider
 {
@@ -40,5 +42,9 @@ class CheckoutServiceProvider extends ServiceProvider
         $this->app->singleton('checkout', function () {
             return new Checkout;
         });
+        
+        // action pattern
+        $this->app->bind(ValidatesVoucher::class, ValidateVoucher::class);
+        
     }
 }

@@ -13,9 +13,14 @@ class PriceHelper implements Arrayable
         $this->data = array_change_key_case($data, CASE_UPPER);
     }
     
-    public function get(string $currency): Money
+    public function get(string $currency): Money|null
     {
         $currency = strtoupper($currency);
+        
+        if (!array_key_exists($currency, $this->data)) {
+            return null;
+        }
+        
         return Money::make($this->data[$currency] ?? 0, $currency);
     }
     

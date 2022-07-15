@@ -42,9 +42,21 @@ class ProductTest extends TestCase
             ]
         ]);
         
-        // easy way of retrieving a price
-        
-        $this->assertEquals(124.10, $product->price('gbp')?->toFloat());
+        $this->assertEquals(124.10, $product->price('gbp')->toFloat());
+    }
+    
+    /**
+     * @test
+     **/
+    function a_product_with_no_currency_does_something()
+    {
+        $product = factory(Product::class)->create([
+            'pricing' => [
+                'gbp' => 12410
+            ]
+        ]);
+    
+        $this->assertNull($product->price('eur')?->toFloat());
     }
     
     /**

@@ -5,8 +5,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use Motomedialab\Checkout\Enums\ProductStatus;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      *
@@ -21,6 +20,7 @@ return new class extends Migration
                 ->references('id')->on(config('checkout.tables.products'))
                 ->cascadeOnDelete();
             
+            $table->string('status', 20)->default(ProductStatus::AVAILABLE->value);
             $table->string('name');
             
             $table->float('vat_rate')->default(0);
@@ -29,9 +29,10 @@ return new class extends Migration
             $table->json('shipping')->default('[]');
             
             $table->timestamps();
+            $table->softDeletes();
         });
     }
-
+    
     /**
      * Reverse the migrations.
      *

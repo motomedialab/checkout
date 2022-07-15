@@ -13,19 +13,14 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create(config('checkout.tables.order_product'), function (Blueprint $table) {
+        Schema::create(config('checkout.tables.product_voucher'), function (Blueprint $table) {
             $table->id();
             
             $table->foreignId('product_id')->nullable()
                 ->references('id')->on(config('checkout.tables.products'))->nullOnDelete();
     
-            $table->foreignId('order_id')->nullable()
-                ->references('id')->on(config('checkout.tables.products'))->nullOnDelete();
-            
-            $table->unsignedInteger('quantity');
-            
-            $table->float('amount_in_pence');
-            $table->float('vat_rate');
+            $table->foreignId('voucher_id')->nullable()
+                ->references('id')->on(config('checkout.tables.vouchers'))->nullOnDelete();
         });
     }
 
@@ -36,6 +31,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists(config('checkout.tables.order_product'));
+        Schema::dropIfExists(config('checkout.tables.product_voucher'));
     }
 };

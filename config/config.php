@@ -10,6 +10,7 @@ return [
         'products' => 'checkout_products',
         'vouchers' => 'checkout_vouchers',
         'order_product' => 'checkout_order_product',
+        'product_voucher' => 'checkout_product_voucher',
     ],
     
     'currencies' => [
