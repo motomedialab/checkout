@@ -8,7 +8,7 @@ use Motomedialab\Checkout\Models\Order;
 use Motomedialab\Checkout\Models\Product;
 use Motomedialab\Checkout\Tests\TestCase;
 
-class NewOrderFactoryTest extends TestCase
+class OrderFactoryTest extends TestCase
 {
     
     /**
@@ -71,6 +71,22 @@ class NewOrderFactoryTest extends TestCase
         
         $this->assertEquals($address, $order->recipient_address);
         $this->assertEquals(OrderStatus::PENDING, $order->fresh()->status);
+    }
+    
+    /**
+     * @test
+     **/
+    function products_can_be_incremented()
+    {
+        $product = factory(Product::class)->create();
+        
+        $factory = OrderFactory::make('gbp')->add($product);
+        
+        // add another 3 items of the same product (increment)
+        $order = $factory->add($product, 3, true)->save()->fresh();
+        
+        $this->assertCount(1, $order->products);
+        $this->assertEquals(4, $order->products->first()->basket->quantity);
     }
     
 }
