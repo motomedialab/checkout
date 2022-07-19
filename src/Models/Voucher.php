@@ -2,13 +2,32 @@
 
 namespace Motomedialab\Checkout\Models;
 
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
 
+/**
+ * @property string $code
+ * @property bool $percentage
+ * @property bool $quantity_price
+ * @property bool $on_basket
+ * @property int $value
+ * @property int $max_uses
+ * @property int $total_uses
+ * @property Carbon $valid_from
+ * @property Carbon $valid_until
+ * @property Collection $products
+ */
 class Voucher extends Model
 {
     use SoftDeletes;
+    
+    protected $casts = [
+        'valid_from' => 'date',
+        'valid_until' => 'date',
+    ];
     
     public function __construct(array $attributes = [])
     {
@@ -19,6 +38,6 @@ class Voucher extends Model
     
     public function products(): BelongsToMany
     {
-        return $this->belongsToMany(Product::class, config('checkout.tables.products'));
+        return $this->belongsToMany(Product::class, config('checkout.tables.product_voucher'));
     }
 }

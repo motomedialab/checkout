@@ -18,7 +18,7 @@ class OrderFactory
         $this->basket = collect();
         
         $this->order->products->each(function (Product $product) {
-            $this->add($product, $product->pivot->quantity);
+            $this->add($product, $product->basket->quantity);
         });
     }
     
@@ -36,7 +36,16 @@ class OrderFactory
     
     public function add(Product $product, int $quantity = 1): static
     {
+        if (!$product->pricing->has($this->order->currency)) {
+            throw new \Exception($product->name.' is not available in the requested currency');
+        }
+        
         $product->setAttribute('quantity', $quantity);
+        
+        if ($this->basket->contains($product)) {
+            $this->remove($product);
+        }
+        
         $this->basket->push($product);
         
         return $this;
@@ -44,7 +53,7 @@ class OrderFactory
     
     public function remove(Product $product): static
     {
-        $this->basket->where('id', $product->getKey())?->pop();
+        $this->basket = $this->basket->reject(fn(Product $item) => $item->is($product));
         
         return $this;
     }
@@ -58,7 +67,7 @@ class OrderFactory
     
     public function applyVoucher(Voucher $voucher): static
     {
-        if (app(ValidatesVoucher::class)($this, $voucher)) {
+        if (app(ValidatesVoucher::class)($voucher)) {
             $this->voucher = $voucher;
         }
         
@@ -71,23 +80,53 @@ class OrderFactory
         
         $this->order->products()->sync(
             $this->basket->mapWithKeys(function (Product $product, int $key) {
-                return [$product->getKey() => [
-                    'quantity' => $product->quantity,
-                    'amount_in_pence' => $product->price($this->order->currency)->toFloat(),
-                    'vat_rate' => $product->vat_rate,
-                ]];
+                return [
+                    $product->getKey() => [
+                        'quantity' => $product->quantity,
+                        'amount_in_pence' => $product->price($this->order->currency)->toPence(),
+                        'vat_rate' => $product->vat_rate,
+                    ]
+                ];
             })->toArray()
         );
         
         $this->order->voucher()->associate($this->voucher);
-    
-        $this->order->amount_in_pence = $this->basket
-            ->map(fn(Product $product) => $product->price($this->order->currency)->toPence() * $product->quantity)->sum() ?? 0;
         
-        $this->order->shipping_in_pence = $this->basket
-            ->map(fn(Product $product) => $product->shipping($this->order->currency)?->toPence() ?? 0)->max() ?? 0;
+        $this->calculateTotals();
         
         return tap($this->order)->save();
+    }
+    
+    protected function calculateTotals()
+    {
+        // determine the total amount in pence.
+        $this->order->amount_in_pence = $this->basket
+                ->map(fn(Product $product
+                ) => $product->price($this->order->currency)->toPence() * $product->quantity)->sum() ?? 0;
+        
+        $this->order->shipping_in_pence = $this->basket
+                ->map(fn(Product $product) => $product->shipping($this->order->currency)?->toPence() ?? 0)->max() ?? 0;
+        
+        // determine the discount...
+        if (!$this->voucher) {
+            return $this->order->amount_in_pence;
+        }
+    
+        // determine our discount multiplier
+        $multiplier = $this->voucher->percentage ? $this->voucher->value / 100 : $this->voucher->value * 100;
+        
+        // discount on basket
+        if ($this->voucher->on_basket) {
+            return $this->order->discount_in_pence = ceil(($multiplier <= 1 ? $this->order->amount_in_pence : 1) * $multiplier);
+        }
+        
+        // discount against products
+        return $this->order->discount_in_pence = ceil($this->basket
+            ->when(!$this->voucher->quantity_price, fn(Collection $collection) => $collection->unique('id'))
+            ->filter(fn(Product $product) => $this->voucher->products->contains($product))
+            ->map(fn(Product $product) => $product->price($this->order->currency)->toPence() * ($this->voucher->quantity_price ? $product->quantity : 1))
+            ->map(fn(int $value) => ($multiplier <= 1 ? $value : 1) * $multiplier)
+            ->sum());
     }
     
 }

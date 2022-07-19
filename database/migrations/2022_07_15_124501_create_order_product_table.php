@@ -24,7 +24,7 @@ return new class extends Migration
             
             $table->unsignedInteger('quantity');
             
-            $table->float('amount_in_pence');
+            $table->integer('amount_in_pence');
             $table->float('vat_rate');
         });
     }

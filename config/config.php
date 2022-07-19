@@ -17,5 +17,6 @@ return [
         'GBP' => '£',
         'EUR' => '€',
     ],
-
+    
+    'default_currency' => 'GBP',
 ];

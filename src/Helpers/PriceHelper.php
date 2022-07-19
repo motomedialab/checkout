@@ -17,11 +17,16 @@ class PriceHelper implements Arrayable
     {
         $currency = strtoupper($currency);
         
-        if (!array_key_exists($currency, $this->data)) {
+        if (!$this->has($currency)) {
             return null;
         }
         
         return Money::make($this->data[$currency] ?? 0, $currency);
+    }
+    
+    public function has(string $currency): bool
+    {
+        return array_key_exists(strtoupper($currency), $this->data);
     }
     
     public function toArray(): array

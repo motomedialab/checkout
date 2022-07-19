@@ -3,28 +3,37 @@
 namespace Motomedialab\Checkout\Models;
 
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Motomedialab\Checkout\Contracts\ValidatesVoucher;
 use Motomedialab\Checkout\Enums\OrderStatus;
 use Motomedialab\Checkout\Events\OrderStatusUpdated;
 use Motomedialab\Checkout\Helpers\Money;
+use Ramsey\Uuid\Lazy\LazyUuidFromString;
 use Ramsey\Uuid\Uuid;
 
 /**
  * @property OrderStatus $status
  * @property string $currency
+ * @property LazyUuidFromString $uuid
  * @property integer $amount_in_pence
+ * @property integer $discount_in_pence
  * @property integer $shipping_in_pence
  * @property Money $amount
  * @property Money $shipping
  * @property Money $total
+ * @property Collection $products
  */
 class Order extends Model
 {
     protected $casts = [
         'status' => OrderStatus::class,
         'recipient_address' => 'array',
+        'amount_in_pence' => 'integer',
+        'shipping_in_pence' => 'integer',
+        'discount_in_pence' => 'integer',
     ];
     
     protected $guarded = [];
@@ -39,9 +48,9 @@ class Order extends Model
     /**
      * @param  string  $uuid
      *
-     * @return Order
+     * @return Model
      */
-    public static function findByUuid(string $uuid): Order
+    public static function findByUuid(string $uuid): Model
     {
         return static::query()->where('uuid', $uuid)->firstOrFail();
     }
@@ -62,7 +71,8 @@ class Order extends Model
     public function products(): BelongsToMany
     {
         return $this->belongsToMany(Product::class, config('checkout.tables.order_product'))
-            ->withPivot(['quantity']);
+            ->withPivot(['quantity', 'amount_in_pence', 'vat_rate'])
+            ->as('basket');
     }
     
     /**
@@ -75,9 +85,21 @@ class Order extends Model
         return $this->belongsTo(Voucher::class);
     }
     
-    public function save(array $options = [])
+    /**
+     * Mark an order as confirmed.
+     * This will perform a final validation.
+     *
+     * @return $this
+     */
+    public function confirm(): static
     {
-        return parent::save($options);
+        if ($this->voucher) {
+            app(ValidatesVoucher::class)($this->voucher);
+        }
+        
+        $this->setStatus(OrderStatus::AWAITING_PAYMENT);
+        
+        return $this;
     }
     
     /**

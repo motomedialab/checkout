@@ -24,11 +24,13 @@ return new class extends Migration
             $table->dateTime('valid_from')->nullable()->default(null);
             $table->dateTime('valid_until')->nullable()->default(null);
             
+            $table->float('value');
+            
             // true is percentage, false is fixed value
             $table->boolean('percentage')->default(false);
             
-            // true is apply against a product, false is against a basket
-            $table->boolean('on_product')->default(true);
+            // true is apply against entire basket, false is against defined products
+            $table->boolean('on_basket')->default(false);
             
             // true is apply to the total quantity, false is apply to one item
             $table->boolean('quantity_price')->default(true);

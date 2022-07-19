@@ -8,12 +8,12 @@ $factory->define(Product::class, function (Faker $faker) {
         'name' => $faker->name,
         'vat_rate' => $faker->randomFloat(1, 0, 20),
         'pricing' => [
-            'gbp' => $faker->randomFloat(2, 0, 100),
-            'eur' => $faker->randomFloat(2, 0, 100),
+            'gbp' => $faker->numberBetween(100, 10000),
+            'eur' => $faker->numberBetween(100, 10000),
         ],
         'shipping' => [
-            'gbp' => $faker->randomFloat(2, 0, 5),
-            'eur' => $faker->randomFloat(2, 0, 5),
+            'gbp' => $faker->numberBetween(50, 1000),
+            'eur' => $faker->numberBetween(50, 1000),
         ]
     ];
 });

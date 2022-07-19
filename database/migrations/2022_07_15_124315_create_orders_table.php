@@ -24,6 +24,7 @@ return new class extends Migration {
             $table->string('status', 20)->default(OrderStatus::PENDING->value);
             
             $table->unsignedBigInteger('amount_in_pence')->default(0);
+            $table->unsignedBigInteger('discount_in_pence')->default(0);
             $table->unsignedBigInteger('shipping_in_pence')->default(0);
             
             $table->foreignId('voucher_id')->nullable()

@@ -55,7 +55,7 @@ class NewOrderFactoryTest extends TestCase
         $order = $factory->save()->fresh();
         
         // we should now have 5 items in our basket...
-        $this->assertEquals(5, $order->products->map(fn($product) => $product->pivot->quantity)->sum());
+        $this->assertEquals(5, $order->products->map(fn($product) => $product->basket->quantity)->sum());
     }
     
     /**
