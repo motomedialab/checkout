@@ -2,9 +2,11 @@
 
 namespace Motomedialab\Checkout;
 
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Motomedialab\Checkout\Actions\ValidateVoucher;
 use Motomedialab\Checkout\Contracts\ValidatesVoucher;
+use Motomedialab\Checkout\Models\Order;
 
 class CheckoutServiceProvider extends ServiceProvider
 {
@@ -13,21 +15,17 @@ class CheckoutServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        /*
-         * Optional methods to load your package assets
-         */
-        // $this->loadTranslationsFrom(__DIR__.'/../resources/lang', 'checkout');
-        // $this->loadViewsFrom(__DIR__.'/../resources/views', 'checkout');
-        
         $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
         
-        // $this->loadRoutesFrom(__DIR__.'/routes.php');
+        $this->loadRoutesFrom(__DIR__.'/../routes/api.php');
         
         if ($this->app->runningInConsole()) {
             $this->publishes([
                 __DIR__.'/../config/config.php' => config_path('checkout.php'),
             ], 'config');
         }
+        
+        $this->setupRouteModelBindings();
     }
     
     /**
@@ -45,6 +43,13 @@ class CheckoutServiceProvider extends ServiceProvider
         
         // action pattern
         $this->app->bind(ValidatesVoucher::class, ValidateVoucher::class);
-        
+    }
+    
+    protected function setupRouteModelBindings()
+    {
+        Route::bind('order', fn(string $uuid) => Order::query()
+            ->with(['products', 'voucher'])
+            ->where('uuid', $uuid)
+            ->firstOrFail());
     }
 }
