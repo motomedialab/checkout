@@ -18,6 +18,8 @@ return new class extends Migration {
             
             $table->uuid();
             
+            $table->nullableMorphs('owner');
+            
             $table->json('recipient_address')->default('{}');
             
             $table->string('currency')->default('GBP');

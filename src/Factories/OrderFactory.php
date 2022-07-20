@@ -4,6 +4,7 @@ namespace Motomedialab\Checkout\Factories;
 
 use Illuminate\Support\Collection;
 use Motomedialab\Checkout\Contracts\ValidatesVoucher;
+use Motomedialab\Checkout\Exceptions\UnsupportedCurrencyException;
 use Motomedialab\Checkout\Models\Order;
 use Motomedialab\Checkout\Models\Product;
 use Motomedialab\Checkout\Models\Voucher;
@@ -22,11 +23,24 @@ class OrderFactory
         });
     }
     
+    /**
+     * Create a new OrderFactory instance.
+     *
+     * @param  string  $currency
+     *
+     * @return OrderFactory
+     *
+     * @throws UnsupportedCurrencyException
+     */
     public static function make(string $currency): OrderFactory
     {
-        return new self(new Order([
-            'currency' => strtoupper($currency)
-        ]));
+        $currency = strtoupper($currency);
+        
+        if (!array_key_exists($currency, config('checkout.currencies'))) {
+            throw new UnsupportedCurrencyException();
+        }
+        
+        return new self(new Order(['currency' => $currency]));
     }
     
     public static function fromExisting(Order $order): OrderFactory
@@ -74,7 +88,7 @@ class OrderFactory
         return $this;
     }
     
-    public function save()
+    public function save(): Order
     {
         $this->order->save();
         

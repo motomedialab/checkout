@@ -7,9 +7,11 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Motomedialab\Checkout\Contracts\ValidatesVoucher;
 use Motomedialab\Checkout\Enums\OrderStatus;
 use Motomedialab\Checkout\Events\OrderStatusUpdated;
+use Motomedialab\Checkout\Exceptions\InvalidVoucherException;
 use Motomedialab\Checkout\Helpers\Money;
 use Ramsey\Uuid\Lazy\LazyUuidFromString;
 use Ramsey\Uuid\Uuid;
@@ -45,6 +47,11 @@ class Order extends Model
         $this->setTable(config('checkout.tables.orders'));
     }
     
+    public function getRouteKeyName(): string
+    {
+        return 'uuid';
+    }
+    
     /**
      * @param  string  $uuid
      *
@@ -76,6 +83,16 @@ class Order extends Model
     }
     
     /**
+     * An order has an owner.
+     *
+     * @return MorphTo
+     */
+    public function owner(): MorphTo
+    {
+        return $this->morphTo('owner');
+    }
+    
+    /**
      * An order belongs to a voucher
      *
      * @return BelongsTo
@@ -90,6 +107,8 @@ class Order extends Model
      * This will perform a final validation.
      *
      * @return $this
+     *
+     * @throws InvalidVoucherException
      */
     public function confirm(): static
     {
@@ -107,14 +126,16 @@ class Order extends Model
      *
      * @param  OrderStatus  $status
      *
-     * @return void
+     * @return Order
      */
-    public function setStatus(OrderStatus $status): void
+    public function setStatus(OrderStatus $status): static
     {
         $this->status = $status;
         $this->save();
         
         event(new OrderStatusUpdated($this, $status));
+        
+        return $this;
     }
     
     protected function amount(): Attribute

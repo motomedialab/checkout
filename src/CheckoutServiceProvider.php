@@ -2,10 +2,12 @@
 
 namespace Motomedialab\Checkout;
 
+use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Motomedialab\Checkout\Actions\ValidateVoucher;
 use Motomedialab\Checkout\Contracts\ValidatesVoucher;
+use Motomedialab\Checkout\Enums\OrderStatus;
 use Motomedialab\Checkout\Models\Order;
 
 class CheckoutServiceProvider extends ServiceProvider
@@ -50,6 +52,7 @@ class CheckoutServiceProvider extends ServiceProvider
         Route::bind('order', fn(string $uuid) => Order::query()
             ->with(['products', 'voucher'])
             ->where('uuid', $uuid)
+            ->where('status', OrderStatus::PENDING->value)
             ->firstOrFail());
     }
 }

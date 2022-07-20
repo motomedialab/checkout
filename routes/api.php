@@ -3,5 +3,9 @@
 use Illuminate\Support\Facades\Route;
 use Motomedialab\Checkout\Http\Controllers\CheckoutController;
 
-Route::resource('checkout', CheckoutController::class)
-    ->only('show', 'store', 'update', 'destroy');
+Route::middleware('api')->group(function () {
+    
+    Route::resource('checkout', CheckoutController::class)
+        ->parameter('checkout', 'order')
+        ->only('show', 'store', 'update', 'destroy');
+});

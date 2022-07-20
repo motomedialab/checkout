@@ -36,6 +36,11 @@ class Voucher extends Model
         $this->setTable(config('checkout.tables.vouchers'));
     }
     
+    public static function findByCode(string $code): static
+    {
+        return Voucher::query()->where('code', $code)->firstOrFail();
+    }
+    
     public function products(): BelongsToMany
     {
         return $this->belongsToMany(Product::class, config('checkout.tables.product_voucher'));
