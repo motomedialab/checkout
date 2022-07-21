@@ -3,7 +3,13 @@
 use Illuminate\Support\Facades\Route;
 use Motomedialab\Checkout\Http\Controllers\CheckoutController;
 
-Route::middleware('api')->group(function () {
+$route = Route::middleware('api');
+
+if (config('checkout.domain')) {
+    $route->domain(config('checkout.domain'));
+}
+
+$route->group(function () {
     
     Route::resource('checkout', CheckoutController::class)
         ->parameter('checkout', 'order')
