@@ -3,6 +3,7 @@
 namespace Motomedialab\Checkout\Http\Controllers;
 
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -110,6 +111,8 @@ class CheckoutController
                 function ($key, $value, $fail) {
                     try {
                         app(ValidatesVoucher::class)(Voucher::findByCode($value));
+                    } catch (ModelNotFoundException) {
+                        $fail('Unknown voucher code');
                     } catch (\Exception $e) {
                         $fail($e->getMessage());
                     }

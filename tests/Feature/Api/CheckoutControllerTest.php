@@ -161,4 +161,18 @@ class CheckoutControllerTest extends TestCase
             ->assertStatus(404);
     }
     
+    /**
+     * @test
+     **/
+    function a_voucher_exception_returns_to_browser()
+    {
+        $response = $this->postJson(route('checkout.store'), [
+            'currency' => 'gbp',
+            'voucher' => 'test'
+        ]);
+        
+        $response->assertStatus(422);
+        $this->assertEquals('Unknown voucher code', $response->json('errors.voucher.0'));
+    }
+    
 }
