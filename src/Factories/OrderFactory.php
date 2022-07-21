@@ -79,13 +79,23 @@ class OrderFactory
         return $this;
     }
     
-    public function applyVoucher(Voucher $voucher): static
+    public function applyVoucher(?Voucher $voucher): static
     {
+        if (is_null($voucher)) {
+            $this->voucher = null;
+            return $this;
+        }
+        
         if (app(ValidatesVoucher::class)($voucher)) {
             $this->voucher = $voucher;
         }
         
         return $this;
+    }
+    
+    public function removeVoucher(): static
+    {
+        return $this->applyVoucher(null);
     }
     
     public function save(): Order

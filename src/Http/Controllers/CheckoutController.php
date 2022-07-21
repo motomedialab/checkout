@@ -24,39 +24,26 @@ class CheckoutController
     
     public function store(Request $request): OrderResource
     {
-        $this->validate($request, ['currency' => ['required', 'string', 'min:3', 'max:3']]);
+        $validated = $this->validate($request, ['currency' => ['required', 'string', 'min:3', 'max:3']]);
         
         try {
-            $factory = OrderFactory::make($request->get('currency'));
+            $factory = OrderFactory::make(
+                $validated['currency'] ?? config('checkout.default_currency')
+            );
         } catch (UnsupportedCurrencyException $e) {
             throw ValidationException::withMessages(['currency' => 'Sorry, this currency isn\'t supported yet.']);
         }
         
-        $this->products($request)
-            ->each(fn(Product $product) => $factory->add(
-                $product,
-                $product->getAttribute('quantity')
-            ));
-        
-        return OrderResource::make($factory->save());
+        return $this->createOrUpdate($validated, $factory);
     }
     
-    public function update(Request $request, Order $order)
+    public function update(Request $request, Order $order): OrderResource
     {
         $validated = $this->validate($request, [
             'increment' => ['nullable', 'boolean'],
         ]);
         
-        $factory = OrderFactory::fromExisting($order);
-        
-        $this->products($request)
-            ->each(fn(Product $product) => $factory->add(
-                $product,
-                $product->getAttribute('quantity'),
-                $validated['increment'] ?? true
-            ));
-        
-        return OrderResource::make($factory->save());
+        return $this->createOrUpdate($validated, OrderFactory::fromExisting($order));
     }
     
     /**
@@ -72,6 +59,35 @@ class CheckoutController
         $order->delete();
         
         return response()->json(['success' => true], 204);
+    }
+    
+    /**
+     * Create or update an order based on an order factory instance.
+     *
+     * @param  array  $validated
+     * @param  OrderFactory  $factory
+     *
+     * @return OrderResource
+     * @throws \Exception
+     */
+    protected function createOrUpdate(array $validated, OrderFactory $factory): OrderResource
+    {
+        $this->products($validated['products'] ?? [])
+            ->each(fn(Product $product) => $factory->add(
+                $product,
+                $product->getAttribute('quantity'),
+                $validated['increment'] ?? true
+            ));
+        
+        if (array_key_exists('voucher', $validated)) {
+            $factory->applyVoucher(
+                is_null($validated['voucher'])
+                    ? null
+                    : Voucher::findByCode($validated['voucher'])
+            );
+        }
+        
+        return OrderResource::make($factory->save());
     }
     
     /**
@@ -107,13 +123,13 @@ class CheckoutController
     /**
      * Return a collection of products based on the request.
      *
-     * @param  Request  $request
+     * @param  array  $products
      *
      * @return Collection
      */
-    protected function products(Request $request): Collection
+    protected function products(array $products): \Illuminate\Support\Collection
     {
-        $productCollection = collect($request->get('products'));
+        $productCollection = collect($products);
         
         if ($productCollection->isEmpty()) {
             return collect();

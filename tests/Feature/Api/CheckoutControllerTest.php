@@ -110,8 +110,15 @@ class CheckoutControllerTest extends TestCase
      **/
     function a_voucher_can_be_added_to_order()
     {
-        $product = factory(Product::class)->create();
-        $voucher = factory(Voucher::class)->create();
+        $product = factory(Product::class)->create([
+            'pricing' => ['gbp' => 10000] // make the product £10
+        ]);
+        $voucher = factory(Voucher::class)->create([
+            'code' => 'ADVANTAGE',
+            'on_basket' => true,
+            'percentage' => true,
+            'value' => 10, // 10% discount voucher
+        ]);
         
         $response = $this->postJson(route('checkout.store'), [
             'currency' => 'gbp',
@@ -121,7 +128,24 @@ class CheckoutControllerTest extends TestCase
             ]
         ]);
         
-        dd($response->getStatusCode(), $response->json());
+        $response->assertStatus(201);
+        
+        $this->assertEquals(1000, $response->json('data.totals.discount_in_pence'));
+        $this->assertEquals('ADVANTAGE', $response->json('data.voucher'));
+    }
+    
+    /**
+     * @test
+     **/
+    function a_voucher_can_be_removed_from_an_order()
+    {
+        $voucher = factory(Voucher::class)->create();
+        $order = OrderFactory::make('gbp')->applyVoucher($voucher)->save();
+        
+        $response = $this->putJson(route('checkout.update', $order), ['voucher' => null]);
+        
+        $response->assertStatus(200);
+        $this->assertNull($response->json('data.voucher'));
     }
     
     /**
