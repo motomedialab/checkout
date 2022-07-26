@@ -20,7 +20,7 @@ return new class extends Migration
                 ->references('id')->on(config('checkout.tables.products'))->nullOnDelete();
     
             $table->foreignId('order_id')->nullable()
-                ->references('id')->on(config('checkout.tables.products'))->nullOnDelete();
+                ->references('id')->on(config('checkout.tables.orders'))->nullOnDelete();
             
             $table->unsignedInteger('quantity');
             
