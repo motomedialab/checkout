@@ -9,6 +9,7 @@ namespace Motomedialab\Checkout\Actions;
 use Illuminate\Support\Collection;
 use Motomedialab\Checkout\Contracts\AppliesVoucher;
 use Motomedialab\Checkout\Contracts\CalculatesProductsValue;
+use Motomedialab\Checkout\Contracts\ValidatesVoucher;
 use Motomedialab\Checkout\Models\Product;
 use Motomedialab\Checkout\Models\Voucher;
 
@@ -17,6 +18,12 @@ class ApplyVoucher implements AppliesVoucher
     
     public function __invoke(Collection $products, Voucher $voucher, string $currency): int
     {
+        try {
+            app(ValidatesVoucher::class)($voucher);
+        } catch (\Exception $e) {
+            return 0;
+        }
+        
         // determine our discount multiplier
         $multiplier = $voucher->percentage ? $voucher->value / 100 : $voucher->value * 100;
         $productsValue = app(CalculatesProductsValue::class)($products, $currency);
