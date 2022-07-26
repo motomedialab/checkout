@@ -3,6 +3,9 @@
 namespace Motomedialab\Checkout\Factories;
 
 use Illuminate\Support\Collection;
+use Motomedialab\Checkout\Contracts\AppliesVoucher;
+use Motomedialab\Checkout\Contracts\CalculatesProductsShipping;
+use Motomedialab\Checkout\Contracts\CalculatesProductsValue;
 use Motomedialab\Checkout\Contracts\ValidatesVoucher;
 use Motomedialab\Checkout\Enums\ProductStatus;
 use Motomedialab\Checkout\Exceptions\UnsupportedCurrencyException;
@@ -126,41 +129,14 @@ class OrderFactory
         return tap($this->order)->save();
     }
     
-    protected function calculateTotals()
+    protected function calculateTotals(): void
     {
-        // determine the total amount in pence.
-        $this->order->amount_in_pence = $this->basket
-                ->map(fn(Product $product
-                ) => $product->price($this->order->currency)->toPence() * $product->quantity)->sum() ?? 0;
+        // determine our totals.
+        $this->order->amount_in_pence = app(CalculatesProductsValue::class)($this->basket, $this->order->currency);
+        $this->order->shipping_in_pence = app(CalculatesProductsShipping::class)($this->basket, $this->order->currency);
         
-        $this->order->shipping_in_pence = $this->basket
-                ->map(fn(Product $product) => $product->shipping($this->order->currency)?->toPence() ?? 0)->max() ?? 0;
-        
-        // determine the discount...
-        if (!$this->voucher) {
-            return $this->order->amount_in_pence;
-        }
-        
-        // determine our discount multiplier
-        $multiplier = $this->voucher->percentage ? $this->voucher->value / 100 : $this->voucher->value * 100;
-        
-        // discount on basket
-        if ($this->voucher->on_basket) {
-            return $this->order->discount_in_pence = min(
-                ceil(($multiplier <= 1 ? $this->order->amount_in_pence : 1) * $multiplier),
-                $this->order->amount_in_pence
-            );
-        }
-        
-        // discount against products
-        return $this->order->discount_in_pence = min(ceil($this->basket
-            ->when(!$this->voucher->quantity_price, fn(Collection $collection) => $collection->unique('id'))
-            ->filter(fn(Product $product) => $this->voucher->products->contains($product))
-            ->map(fn(Product $product) => $product->price($this->order->currency)->toPence()
-                * ($this->voucher->quantity_price ? $product->quantity : 1)
-            )
-            ->map(fn(int $value) => ($multiplier <= 1 ? $value : 1) * $multiplier)
-            ->sum()), $this->order->amount_in_pence);
+        $this->order->discount_in_pence = $this->voucher
+            ? app(AppliesVoucher::class)($this->basket, $this->voucher, $this->order->currency) : 0;
     }
     
 }
