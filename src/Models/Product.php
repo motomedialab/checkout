@@ -4,6 +4,7 @@ namespace Motomedialab\Checkout\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Motomedialab\Checkout\Casts\PricingCast;
 use Motomedialab\Checkout\Enums\OrderStatus;
@@ -51,6 +52,26 @@ class Product extends Model
         );
     }
     
+    public function children(): HasMany
+    {
+        return $this->hasMany(
+            Product::class,
+            'parent_product_id',
+        );
+    }
+    
+    /**
+     * Determine if the product is available in the given currency
+     *
+     * @param  string  $currency
+     *
+     * @return bool
+     */
+    public function availableInCurrency(string $currency): bool
+    {
+        return $this->pricing->get($currency) instanceof Money;
+    }
+    
     /**
      * Retrieve our pricing value.
      *
@@ -61,7 +82,7 @@ class Product extends Model
     public function price(string $currency): Money|null
     {
         if ($this->parent) {
-            return $this->parent->price($currency)->add(
+            return $this->parent->price($currency)?->add(
                 $this->pricing->get($currency)
             );
         }

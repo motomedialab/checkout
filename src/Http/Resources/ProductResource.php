@@ -20,7 +20,7 @@ class ProductResource extends JsonResource
                 $this->resource->name,
                 $this->resource->parent?->name,
             ),
-            'quantity' => $this->whenLoaded('basket', $this->basket->quantity),
+            'quantity' => $this->whenLoaded('basket', fn() => $this->basket->quantity),
             'pricing' => VatCalculator::make(
                 $this->resource->relationLoaded('basket')
                     ? $this->resource->basket->amount_in_pence
@@ -30,6 +30,7 @@ class ProductResource extends JsonResource
                     ? $this->resource->basket->vat_rate
                     : $this->resource->vat_rate
             ),
+            'children' => static::collection($this->whenLoaded('children')),
         ];
     }
 }

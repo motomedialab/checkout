@@ -64,6 +64,26 @@ class CheckoutControllerTest extends TestCase
     /**
      * @test
      **/
+    function a_product_with_children_cannot_be_ordered()
+    {
+        // create a parent product that has one child
+        $product = factory(Product::class)->create();
+        factory(Product::class)->create(['parent_product_id' => $product]);
+        
+        $response = $this->postJson(route('checkout.store'), [
+            'currency' => 'gbp',
+            'products' => [
+                [
+                    'id' => $product->getKey(),
+                    'quantity' => 1,
+                ]
+            ]
+        ])->assertJsonValidationErrorFor('products.0.id');
+    }
+    
+    /**
+     * @test
+     **/
     function a_pending_order_can_be_updated()
     {
         $product = factory(Product::class)->create();

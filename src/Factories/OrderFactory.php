@@ -141,17 +141,21 @@ class OrderFactory
         
         // discount on basket
         if ($this->voucher->on_basket) {
-            return $this->order->discount_in_pence = ceil(($multiplier <= 1 ? $this->order->amount_in_pence : 1) * $multiplier);
+            return $this->order->discount_in_pence = min(
+                ceil(($multiplier <= 1 ? $this->order->amount_in_pence : 1) * $multiplier),
+                $this->order->amount_in_pence
+            );
         }
         
         // discount against products
-        return $this->order->discount_in_pence = ceil($this->basket
+        return $this->order->discount_in_pence = min(ceil($this->basket
             ->when(!$this->voucher->quantity_price, fn(Collection $collection) => $collection->unique('id'))
             ->filter(fn(Product $product) => $this->voucher->products->contains($product))
-            ->map(fn(Product $product
-            ) => $product->price($this->order->currency)->toPence() * ($this->voucher->quantity_price ? $product->quantity : 1))
+            ->map(fn(Product $product) => $product->price($this->order->currency)->toPence()
+                * ($this->voucher->quantity_price ? $product->quantity : 1)
+            )
             ->map(fn(int $value) => ($multiplier <= 1 ? $value : 1) * $multiplier)
-            ->sum());
+            ->sum()), $this->order->amount_in_pence);
     }
     
 }

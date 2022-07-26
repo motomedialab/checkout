@@ -104,7 +104,14 @@ class CheckoutController
         return $request->validate([
             ...$rules,
             'products' => ['nullable', 'array'],
-            'products.*.id' => ['required', Rule::exists(config('checkout.tables.products'))],
+            'products.*.id' => [
+                'required',
+                function ($parameter, $value, $fail) {
+                    if (null === Product::query()->whereDoesntHave('children')->find($value)) {
+                        $fail('The product you were looking for could not be found');
+                    }
+                }
+            ],
             'products.*.quantity' => ['nullable', 'numeric', 'min:1', 'max:50'],
             'voucher' => [
                 'nullable',
