@@ -6,6 +6,7 @@
 
 namespace Motomedialab\Checkout\Tests\Feature\Api;
 
+use Motomedialab\Checkout\Enums\ProductStatus;
 use Motomedialab\Checkout\Models\Product;
 use Motomedialab\Checkout\Tests\TestCase;
 
@@ -37,7 +38,8 @@ class ProductControllerTest extends TestCase
                 'data' => [
                     'id',
                     'name',
-                    'pricing'
+                    'pricing',
+                    'available'
                 ]
             ]);
     }
@@ -62,6 +64,7 @@ class ProductControllerTest extends TestCase
                             'id',
                             'name',
                             'pricing',
+                            'available'
                         ]
                     ]
                 ]

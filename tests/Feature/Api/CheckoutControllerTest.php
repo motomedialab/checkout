@@ -7,6 +7,7 @@
 namespace Motomedialab\Checkout\Tests\Feature\Api;
 
 use Motomedialab\Checkout\Enums\OrderStatus;
+use Motomedialab\Checkout\Enums\ProductStatus;
 use Motomedialab\Checkout\Factories\OrderFactory;
 use Motomedialab\Checkout\Models\Order;
 use Motomedialab\Checkout\Models\Product;

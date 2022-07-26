@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Motomedialab\Checkout\Casts\PricingCast;
-use Motomedialab\Checkout\Enums\OrderStatus;
+use Motomedialab\Checkout\Enums\ProductStatus;
 use Motomedialab\Checkout\Helpers\Money;
 use Motomedialab\Checkout\Helpers\PriceHelper;
 
@@ -17,7 +17,7 @@ use Motomedialab\Checkout\Helpers\PriceHelper;
  * @property PriceHelper $shipping
  * @property string $name
  * @property float $vat_rate
- * @property OrderStatus $status
+ * @property ProductStatus $status
  */
 class Product extends Model
 {
@@ -28,6 +28,7 @@ class Product extends Model
     protected $casts = [
         'pricing' => PricingCast::class,
         'shipping' => PricingCast::class,
+        'status' => ProductStatus::class,
     ];
     
     protected $with = ['parent'];
@@ -69,7 +70,7 @@ class Product extends Model
      */
     public function availableInCurrency(string $currency): bool
     {
-        return $this->pricing->get($currency) instanceof Money;
+        return $this->pricing->has($currency);
     }
     
     /**

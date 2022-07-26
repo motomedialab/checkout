@@ -3,6 +3,7 @@
 namespace Motomedialab\Checkout\Tests\Feature;
 
 use Motomedialab\Checkout\Enums\OrderStatus;
+use Motomedialab\Checkout\Enums\ProductStatus;
 use Motomedialab\Checkout\Factories\OrderFactory;
 use Motomedialab\Checkout\Models\Order;
 use Motomedialab\Checkout\Models\Product;
@@ -56,6 +57,20 @@ class OrderFactoryTest extends TestCase
         
         // we should now have 5 items in our basket...
         $this->assertEquals(5, $order->products->map(fn($product) => $product->basket->quantity)->sum());
+    }
+    
+    /**
+     * @test
+     **/
+    function an_unavailable_product_cannot_be_added()
+    {
+        $this->expectException(\Exception::class);
+        
+        $product = factory(Product::class)->create(['status' => ProductStatus::UNAVAILABLE]);
+        
+        OrderFactory::make('gbp')
+            ->add($product);
+        
     }
     
     /**

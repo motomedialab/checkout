@@ -3,6 +3,7 @@
 namespace Motomedialab\Checkout\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
+use Motomedialab\Checkout\Enums\ProductStatus;
 use Motomedialab\Checkout\Helpers\VatCalculator;
 use Motomedialab\Checkout\Models\Product;
 
@@ -30,6 +31,7 @@ class ProductResource extends JsonResource
                     ? $this->resource->basket->vat_rate
                     : $this->resource->vat_rate
             ),
+            'available' => $this->resource->status === ProductStatus::AVAILABLE,
             'children' => static::collection($this->whenLoaded('children')),
         ];
     }
