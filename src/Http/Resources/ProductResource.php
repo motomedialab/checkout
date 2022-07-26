@@ -27,11 +27,7 @@ class ProductResource extends JsonResource
         
         return [
             'id' => $this->resource->getKey(),
-            'name' => sprintf(
-                $this->resource->parent ? '%2$s [%1$s]' : '%1$s',
-                $this->resource->name,
-                $this->resource->parent?->name,
-            ),
+            'name' => $this->resource->name,
             'currency' => $currency,
             'quantity' => $this->whenLoaded('basket', fn() => $this->basket->quantity),
             'pricing' => VatCalculator::make(
