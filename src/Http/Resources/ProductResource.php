@@ -14,6 +14,8 @@ class ProductResource extends JsonResource
 {
     public function toArray($request)
     {
+        $currency = strtoupper($request->get('currency', config('checkout.default_currency')));
+        
         return [
             'id' => $this->resource->getKey(),
             'name' => sprintf(
@@ -21,11 +23,12 @@ class ProductResource extends JsonResource
                 $this->resource->name,
                 $this->resource->parent?->name,
             ),
+            'currency' => $currency,
             'quantity' => $this->whenLoaded('basket', fn() => $this->basket->quantity),
             'pricing' => VatCalculator::make(
                 $this->resource->relationLoaded('basket')
                     ? $this->resource->basket->amount_in_pence
-                    : $this->resource->price($request->get('currency', config('checkout.default_currency')))->toPence(),
+                    : $this->resource->price($currency)->toPence(),
                 
                 $this->resource->relationLoaded('basket')
                     ? $this->resource->basket->vat_rate
