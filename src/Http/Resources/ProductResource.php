@@ -21,7 +21,8 @@ class ProductResource extends JsonResource
             ?? strtoupper($request->get('currency', config('checkout.default_currency')));
         
         try {
-            $voucher = $request->has('voucher') ? Voucher::findByCode($request->get('voucher')) : null;
+            $voucher = $this->resource->orderPivot?->order->voucher
+                ?? $request->has('voucher') ? Voucher::findByCode($request->get('voucher')) : null;
         } catch (ModelNotFoundException $e) {
             $voucher = new Voucher(['value' => 0]);
         }
