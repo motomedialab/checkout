@@ -2,7 +2,7 @@
 
 namespace Motomedialab\Checkout\Exceptions;
 
-class UnsupportedCurrencyException extends \Exception
+class UnsupportedCurrencyException extends CheckoutException
 {
     
 }

@@ -70,7 +70,8 @@ class Product extends Model
      */
     public function availableInCurrency(string $currency): bool
     {
-        return $this->pricing->has($currency);
+        return $this->pricing->has($currency)
+            || $this->parent?->pricing->has($currency);
     }
     
     /**

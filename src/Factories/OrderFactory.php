@@ -8,6 +8,7 @@ use Motomedialab\Checkout\Contracts\CalculatesProductsShipping;
 use Motomedialab\Checkout\Contracts\CalculatesProductsValue;
 use Motomedialab\Checkout\Contracts\ValidatesVoucher;
 use Motomedialab\Checkout\Enums\ProductStatus;
+use Motomedialab\Checkout\Exceptions\CheckoutException;
 use Motomedialab\Checkout\Exceptions\UnsupportedCurrencyException;
 use Motomedialab\Checkout\Models\Order;
 use Motomedialab\Checkout\Models\Product;
@@ -55,11 +56,11 @@ class OrderFactory
     public function add(Product $product, int $quantity = 1, bool $increment = false): static
     {
         if (!$product->availableInCurrency($this->order->currency)) {
-            throw new \Exception($product->name.' is not available in the requested currency');
+            throw new CheckoutException($product->name.' is not available in the requested currency');
         }
         
         if ($product->status === ProductStatus::UNAVAILABLE) {
-            throw new \Exception($product->name . ' is not available for purchase');
+            throw new CheckoutException($product->name . ' is not available for purchase');
         }
         
         $product->setAttribute(
