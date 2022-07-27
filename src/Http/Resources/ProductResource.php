@@ -22,7 +22,7 @@ class ProductResource extends JsonResource
         
         try {
             $voucher = $this->resource->orderPivot?->order->voucher
-                ?? $request->has('voucher') ? Voucher::findByCode($request->get('voucher')) : null;
+                ?? ($request->has('voucher') ? Voucher::findByCode($request->get('voucher')) : null);
         } catch (ModelNotFoundException $e) {
             $voucher = new Voucher(['value' => 0]);
         }
