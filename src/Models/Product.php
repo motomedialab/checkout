@@ -124,7 +124,7 @@ class Product extends Model
         return new Attribute(
             get: fn($value) => $this->orderPivot?->order->hasBeenSubmitted()
                 ? new PriceHelper([$this->orderPivot->order->currency => $this->orderPivot->amount_in_pence])
-                : new PriceHelper(json_decode($value, true)),
+                : new PriceHelper(json_decode($value, true) ?? []),
             
             set: fn($value) => json_encode($value instanceof Arrayable ? $value->toArray() : $value)
         );
@@ -141,7 +141,7 @@ class Product extends Model
         return new Attribute(
             get: fn($value) => $this->orderPivot?->order->hasBeenSubmitted()
                 ? new PriceHelper([$this->orderPivot->order->currency => $this->orderPivot->shipping_in_pence])
-                : new PriceHelper(json_decode($value, true)),
+                : new PriceHelper(json_decode($value, true) ?? []),
             set: fn($value) => json_encode($value instanceof Arrayable ? $value->toArray() : $value)
         );
     }
