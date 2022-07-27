@@ -18,10 +18,10 @@ class OrderFactoryTest extends TestCase
     function a_new_order_can_be_created()
     {
         $product = factory(Product::class)->create([
-            'pricing' => [
+            'pricing_in_pence' => [
                 'gbp' => 3000, // £30
             ],
-            'shipping' => [
+            'shipping_in_pence' => [
                 'gbp' => 200,
             ]
         ]);
@@ -56,7 +56,7 @@ class OrderFactoryTest extends TestCase
         $order = $factory->save()->fresh();
         
         // we should now have 5 items in our basket...
-        $this->assertEquals(5, $order->products->map(fn($product) => $product->basket->quantity)->sum());
+        $this->assertEquals(5, $order->products->map(fn($product) => $product->orderPivot->quantity)->sum());
     }
     
     /**
@@ -101,7 +101,7 @@ class OrderFactoryTest extends TestCase
         $order = $factory->add($product, 3, true)->save()->fresh();
         
         $this->assertCount(1, $order->products);
-        $this->assertEquals(4, $order->products->first()->basket->quantity);
+        $this->assertEquals(4, $order->products->first()->orderPivot->quantity);
     }
     
 }

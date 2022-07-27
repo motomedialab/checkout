@@ -131,9 +131,12 @@ class CheckoutControllerTest extends TestCase
      **/
     function a_voucher_can_be_added_to_order()
     {
+        
         $product = factory(Product::class)->create([
-            'pricing' => ['gbp' => 10000] // make the product £10
+            'pricing_in_pence' => ['gbp' => 10000], // make the product £10
+            'shipping_in_pence' => [],
         ]);
+        
         $voucher = factory(Voucher::class)->create([
             'code' => 'ADVANTAGE',
             'on_basket' => true,

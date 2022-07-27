@@ -76,7 +76,7 @@ class CheckoutController
         $this->products($validated['products'] ?? [])
             ->each(fn(Product $product) => $factory->add(
                 $product,
-                $product->getAttribute('quantity'),
+                $product->quantity,
                 $validated['increment'] ?? true
             ));
         

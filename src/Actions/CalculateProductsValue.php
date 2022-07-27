@@ -16,7 +16,7 @@ class CalculateProductsValue implements CalculatesProductsValue
     public function __invoke(Collection $products, string $currency)
     {
         return $products->map(function (Product $product) use ($currency) {
-            return $product->price($currency)->toPence() * ($product->quantity ?? 1);
+            return $product->price($currency)->toPence() * ($product->orderPivot->quantity ?? 1);
         })->sum();
     }
 }

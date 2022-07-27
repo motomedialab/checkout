@@ -9,7 +9,7 @@ namespace Motomedialab\Checkout\Contracts;
 use Illuminate\Support\Collection;
 use Motomedialab\Checkout\Models\Voucher;
 
-interface AppliesVoucher
+interface CalculatesDiscountValue
 {
     public function __invoke(Collection $products, Voucher $voucher, string $currency): int;
 }

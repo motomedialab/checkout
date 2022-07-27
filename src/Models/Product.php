@@ -2,22 +2,26 @@
 
 namespace Motomedialab\Checkout\Models;
 
+use Illuminate\Contracts\Support\Arrayable;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Motomedialab\Checkout\Casts\PricingCast;
 use Motomedialab\Checkout\Enums\ProductStatus;
 use Motomedialab\Checkout\Helpers\Money;
 use Motomedialab\Checkout\Helpers\PriceHelper;
+use Motomedialab\Checkout\Models\Pivots\OrderPivot;
 
 /**
  * @property Product $parent
- * @property PriceHelper $pricing
- * @property PriceHelper $shipping
+ * @property PriceHelper $pricing_in_pence
+ * @property PriceHelper $shipping_in_pence
  * @property string $name
  * @property float $vat_rate
+ * @property int $quantity A temporary store for basket quantity
  * @property ProductStatus $status
+ * @property ?OrderPivot $orderPivot
  */
 class Product extends Model
 {
@@ -25,9 +29,15 @@ class Product extends Model
     
     protected $guarded = [];
     
+    /**
+     * A temporary store for our quantity
+     * when manipulating within the basket.
+     *
+     * @var int
+     */
+    protected int $quantityHolder = 0;
+    
     protected $casts = [
-        'pricing' => PricingCast::class,
-        'shipping' => PricingCast::class,
         'status' => ProductStatus::class,
     ];
     
@@ -70,8 +80,8 @@ class Product extends Model
      */
     public function availableInCurrency(string $currency): bool
     {
-        return $this->pricing->has($currency)
-            || $this->parent?->pricing->has($currency);
+        return $this->pricing_in_pence->has($currency)
+            || $this->parent?->pricing_in_pence->has($currency);
     }
     
     /**
@@ -83,15 +93,12 @@ class Product extends Model
      */
     public function price(string $currency): Money|null
     {
-        if ($this->parent) {
-            
-            if ($this->parent->price($currency)) {
-                return $this->parent->price($currency)
-                    ->add($this->pricing->get($currency) ?? Money::make(0, $currency));
-            }
+        if ($this->parent && $this->parent->availableInCurrency($currency)) {
+            return $this->parent->price($currency)
+                ->add($this->pricing_in_pence->get($currency) ?? Money::make(0, $currency));
         }
         
-        return $this->pricing->get($currency);
+        return $this->pricing_in_pence->get($currency);
     }
     
     /**
@@ -103,6 +110,56 @@ class Product extends Model
      */
     public function shipping(string $currency): Money|null
     {
-        return $this->shipping->get($currency);
+        return $this->shipping_in_pence->get($currency);
+    }
+    
+    /**
+     * Determine the product pricing based
+     * on whether the order has been submitted or not.
+     *
+     * @return Attribute
+     */
+    protected function pricingInPence(): Attribute
+    {
+        return new Attribute(
+            get: fn($value) => $this->orderPivot?->order->hasBeenSubmitted()
+                ? new PriceHelper([$this->orderPivot->order->currency => $this->orderPivot->amount_in_pence])
+                : new PriceHelper(json_decode($value, true)),
+            
+            set: fn($value) => json_encode($value instanceof Arrayable ? $value->toArray() : $value)
+        );
+    }
+    
+    /**
+     * Determine the product shipping based
+     * on whether the order has been submitted or not.
+     *
+     * @return Attribute
+     */
+    protected function shippingInPence(): Attribute
+    {
+        return new Attribute(
+            get: fn($value) => $this->orderPivot?->order->hasBeenSubmitted()
+                ? new PriceHelper([$this->orderPivot->order->currency => $this->orderPivot->shipping_in_pence])
+                : new PriceHelper(json_decode($value, true)),
+            set: fn($value) => json_encode($value instanceof Arrayable ? $value->toArray() : $value)
+        );
+    }
+    
+    protected function quantity(): Attribute
+    {
+        return new Attribute(
+            get: fn($value) => $this->orderPivot?->quantity ?? $this->quantityHolder,
+            set: fn($value) => $this->quantityHolder = (int)$value
+        );
+    }
+    
+    protected function vatRate(): Attribute
+    {
+        return new Attribute(
+            get: fn($value) => $this->orderPivot?->order->hasBeenSubmitted()
+                ? $this->orderPivot->vat_rate
+                : $value
+        );
     }
 }

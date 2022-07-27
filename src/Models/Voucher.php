@@ -25,6 +25,9 @@ class Voucher extends Model
     use SoftDeletes;
     
     protected $casts = [
+        'quantity_price' => 'boolean',
+        'on_basket' => 'boolean',
+        'percentage' => 'boolean',
         'valid_from' => 'date',
         'valid_until' => 'date',
     ];

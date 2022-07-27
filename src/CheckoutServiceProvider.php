@@ -5,11 +5,11 @@ namespace Motomedialab\Checkout;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
-use Motomedialab\Checkout\Actions\ApplyVoucher;
+use Motomedialab\Checkout\Actions\CalculateDiscountValue;
 use Motomedialab\Checkout\Actions\CalculateProductsShipping;
 use Motomedialab\Checkout\Actions\CalculateProductsValue;
 use Motomedialab\Checkout\Actions\ValidateVoucher;
-use Motomedialab\Checkout\Contracts\AppliesVoucher;
+use Motomedialab\Checkout\Contracts\CalculatesDiscountValue;
 use Motomedialab\Checkout\Contracts\CalculatesProductsShipping;
 use Motomedialab\Checkout\Contracts\CalculatesProductsValue;
 use Motomedialab\Checkout\Contracts\ValidatesVoucher;
@@ -51,7 +51,7 @@ class CheckoutServiceProvider extends ServiceProvider
         
         // action pattern
         $this->app->bind(ValidatesVoucher::class, ValidateVoucher::class);
-        $this->app->bind(AppliesVoucher::class, ApplyVoucher::class);
+        $this->app->bind(CalculatesDiscountValue::class, CalculateDiscountValue::class);
         $this->app->bind(CalculatesProductsValue::class, CalculateProductsValue::class);
         $this->app->bind(CalculatesProductsShipping::class, CalculateProductsShipping::class);
     }

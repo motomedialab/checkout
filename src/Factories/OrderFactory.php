@@ -3,7 +3,7 @@
 namespace Motomedialab\Checkout\Factories;
 
 use Illuminate\Support\Collection;
-use Motomedialab\Checkout\Contracts\AppliesVoucher;
+use Motomedialab\Checkout\Contracts\CalculatesDiscountValue;
 use Motomedialab\Checkout\Contracts\CalculatesProductsShipping;
 use Motomedialab\Checkout\Contracts\CalculatesProductsValue;
 use Motomedialab\Checkout\Contracts\ValidatesVoucher;
@@ -24,7 +24,7 @@ class OrderFactory
         $this->basket = collect();
         
         $this->order->products->each(function (Product $product) {
-            $this->add($product, $product->basket->quantity);
+            $this->add($product, $product->orderPivot->quantity);
         });
     }
     
@@ -63,10 +63,7 @@ class OrderFactory
             throw new CheckoutException($product->name . ' is not available for purchase');
         }
         
-        $product->setAttribute(
-            'quantity',
-            $this->basket->firstWhere('id', $product->getKey())?->quantity + $quantity
-        );
+        $product->quantity = ($increment ? $this->basket->firstWhere('id', $product->getKey())?->quantity : 0) + $quantity;
         
         $this->remove($product);
         $this->basket->push($product);
@@ -124,20 +121,9 @@ class OrderFactory
         );
         
         $this->order->voucher()->associate($this->voucher);
-        
-        $this->calculateTotals();
+        $this->order->load('products');
         
         return tap($this->order)->save();
-    }
-    
-    protected function calculateTotals(): void
-    {
-        // determine our totals.
-        $this->order->amount_in_pence = app(CalculatesProductsValue::class)($this->basket, $this->order->currency);
-        $this->order->shipping_in_pence = app(CalculatesProductsShipping::class)($this->basket, $this->order->currency);
-        
-        $this->order->discount_in_pence = $this->voucher
-            ? app(AppliesVoucher::class)($this->basket, $this->voucher, $this->order->currency) : 0;
     }
     
 }

@@ -8,11 +8,15 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Motomedialab\Checkout\Contracts\CalculatesDiscountValue;
+use Motomedialab\Checkout\Contracts\CalculatesProductsShipping;
+use Motomedialab\Checkout\Contracts\CalculatesProductsValue;
 use Motomedialab\Checkout\Contracts\ValidatesVoucher;
 use Motomedialab\Checkout\Enums\OrderStatus;
 use Motomedialab\Checkout\Events\OrderStatusUpdated;
 use Motomedialab\Checkout\Exceptions\InvalidVoucherException;
 use Motomedialab\Checkout\Helpers\Money;
+use Motomedialab\Checkout\Models\Pivots\OrderPivot;
 use Ramsey\Uuid\Lazy\LazyUuidFromString;
 use Ramsey\Uuid\Uuid;
 
@@ -27,6 +31,7 @@ use Ramsey\Uuid\Uuid;
  * @property Money $shipping
  * @property Money $total
  * @property Collection $products
+ * @property ?Voucher $voucher
  */
 class Order extends Model
 {
@@ -55,9 +60,9 @@ class Order extends Model
     /**
      * @param  string  $uuid
      *
-     * @return Model
+     * @return Order
      */
-    public static function findByUuid(string $uuid): Model
+    public static function findByUuid(string $uuid): Order
     {
         return static::query()->where('uuid', $uuid)->firstOrFail();
     }
@@ -68,6 +73,21 @@ class Order extends Model
         
         // enforce a UUID for our order
         static::creating(fn($model) => $model->uuid = Uuid::uuid4());
+        
+        static::updating(function (Order $order) {
+            
+            if ($order->hasBeenSubmitted()) {
+                return true;
+            }
+            
+            // persist our amounts
+            $order->amount_in_pence = app(CalculatesProductsValue::class)($order->products, $order->currency);
+            $order->shipping_in_pence = app(CalculatesProductsShipping::class)($order->products, $order->currency);
+            $order->discount_in_pence = $order->voucher ? app(CalculatesDiscountValue::class)($order->products,
+                $order->voucher, $order->currency) : 0;
+            
+            return true;
+        });
     }
     
     /**
@@ -79,7 +99,8 @@ class Order extends Model
     {
         return $this->belongsToMany(Product::class, config('checkout.tables.order_product'))
             ->withPivot(['quantity', 'amount_in_pence', 'vat_rate'])
-            ->as('basket');
+            ->as('orderPivot')
+            ->using(OrderPivot::class);
     }
     
     /**
@@ -137,6 +158,39 @@ class Order extends Model
         
         return $this;
     }
+    
+    protected function amountInPence(): Attribute
+    {
+        return new Attribute(
+            get: fn($value) => $this->hasBeenSubmitted()
+                ? $value
+                : app(CalculatesProductsValue::class)($this->products, $this->currency)
+        );
+    }
+    
+    protected function discountInPence(): Attribute
+    {
+        return new Attribute(
+            get: fn($value) => $this->hasBeenSubmitted() || !$this->voucher
+                ? $value
+                : app(CalculatesDiscountValue::class)($this->products, $this->voucher, $this->currency)
+        );
+    }
+    
+    protected function shippingInPence(): Attribute
+    {
+        return new Attribute(
+            get: fn($value) => $this->hasBeenSubmitted()
+                ? $value
+                : app(CalculatesProductsShipping::class)($this->products, $this->currency)
+        );
+    }
+    
+    public function hasBeenSubmitted(): bool
+    {
+        return $this->exists && $this->status !== OrderStatus::PENDING;
+    }
+    
     
     protected function amount(): Attribute
     {

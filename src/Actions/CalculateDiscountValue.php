@@ -7,13 +7,13 @@
 namespace Motomedialab\Checkout\Actions;
 
 use Illuminate\Support\Collection;
-use Motomedialab\Checkout\Contracts\AppliesVoucher;
+use Motomedialab\Checkout\Contracts\CalculatesDiscountValue;
 use Motomedialab\Checkout\Contracts\CalculatesProductsValue;
 use Motomedialab\Checkout\Contracts\ValidatesVoucher;
 use Motomedialab\Checkout\Models\Product;
 use Motomedialab\Checkout\Models\Voucher;
 
-class ApplyVoucher implements AppliesVoucher
+class CalculateDiscountValue implements CalculatesDiscountValue
 {
     
     public function __invoke(Collection $products, Voucher $voucher, string $currency): int
