@@ -39,9 +39,10 @@ class ProductResource extends JsonResource
                 $voucher instanceof Voucher,
                 fn() => app(CalculatesDiscountValue::class)(collect([$this->resource]), $voucher, $currency)
             ),
+            'vat_rate' => $this->resource->vat_rate,
             'available' => $this->resource->status === ProductStatus::AVAILABLE,
             'children' => static::collection($this->whenLoaded('children')),
-            'parent' => static::make($this->whenLoaded('parent')),
+            'parent' => $this->whenLoaded('parent', fn() => static::make($this->resource->parent)),
         ];
     }
 }

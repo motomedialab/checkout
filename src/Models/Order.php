@@ -188,7 +188,7 @@ class Order extends Model
     
     public function hasBeenSubmitted(): bool
     {
-        return $this->exists && $this->status !== OrderStatus::PENDING;
+        return $this->exists && $this->status && $this->status !== OrderStatus::PENDING;
     }
     
     
