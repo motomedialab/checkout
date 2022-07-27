@@ -74,4 +74,34 @@ class ProductTest extends TestCase
         
         $this->assertEquals(126.10, $child->price('gbp')->toFloat());
     }
+    
+    /**
+     * @test
+     **/
+    function a_variant_with_no_price_adopts_parent_price()
+    {
+        $parent = factory(Product::class)->create(['pricing' => ['gbp' => 12410]]);
+        /** @var Product $child */
+        $child = factory(Product::class)->create([
+            'parent_product_id' => $parent->getKey(),
+            'pricing' => []
+        ]);
+        
+        $this->assertEquals(124.10, $child->price('gbp')->toFloat());
+    }
+    
+    /**
+     * @test
+     **/
+    function a_variant_with_no_parent_price_adopts_variant_price()
+    {
+        $parent = factory(Product::class)->create(['pricing' => []]);
+        /** @var Product $child */
+        $child = factory(Product::class)->create([
+            'parent_product_id' => $parent->getKey(),
+            'pricing' => ['gbp' => 12410]
+        ]);
+    
+        $this->assertEquals(124.10, $child->price('gbp')->toFloat());
+    }
 }

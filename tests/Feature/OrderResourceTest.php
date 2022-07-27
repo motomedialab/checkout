@@ -39,21 +39,6 @@ class OrderResourceTest extends TestCase
     /**
      * @test
      **/
-    function a_product_with_a_parent_has_formatted_name()
-    {
-        $parent = factory(Product::class)->create();
-        $product = factory(Product::class)->create([
-            'parent_product_id' => $parent->getKey(),
-        ]);
-        
-        $resource = ProductResource::make($product)->toArray(request());
-        
-        $this->assertEquals(sprintf('%s [%s]', $parent->name, $product->name), $resource['name']);
-    }
-    
-    /**
-     * @test
-     **/
     function an_order_resource_outputs_voucher()
     {
         $product = factory(Product::class)->create([

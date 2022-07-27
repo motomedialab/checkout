@@ -45,6 +45,7 @@ class ProductResource extends JsonResource
             ),
             'available' => $this->resource->status === ProductStatus::AVAILABLE,
             'children' => static::collection($this->whenLoaded('children')),
+            'parent' => static::make($this->whenLoaded('parent')),
         ];
     }
 }

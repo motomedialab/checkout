@@ -83,9 +83,11 @@ class Product extends Model
     public function price(string $currency): Money|null
     {
         if ($this->parent) {
-            return $this->parent->price($currency)?->add(
-                $this->pricing->get($currency)
-            );
+            
+            if ($this->parent->price($currency)) {
+                return $this->parent->price($currency)
+                    ->add($this->pricing->get($currency) ?? Money::make(0, $currency));
+            }
         }
         
         return $this->pricing->get($currency);
