@@ -2,7 +2,7 @@
 
 namespace Motomedialab\Checkout\Exceptions;
 
-class InvalidVoucherException extends VoucherException
+abstract class VoucherException extends CheckoutException
 {
     
 }

@@ -112,7 +112,10 @@ class Product extends Model
      */
     public function shipping(string $currency): Money|null
     {
-        return $this->shipping_in_pence->get($currency);
+        return max(
+            $this->parent?->shipping_in_pence->get($currency),
+            $this->shipping_in_pence->get($currency)
+        );
     }
     
     /**

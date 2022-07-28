@@ -92,7 +92,7 @@ class OrderFactory
             return $this;
         }
         
-        if (app(ValidatesVoucher::class)($voucher)) {
+        if (app(ValidatesVoucher::class)($voucher, $this->basket)) {
             $this->voucher = $voucher;
         }
         
