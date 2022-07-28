@@ -16,10 +16,10 @@ class VoucherTest extends TestCase
     function a_voucher_with_percentage_is_applied_to_basket()
     {
         // we have a product that costs £100
-        $product = factory(Product::class)->create(['pricing_in_pence' => ['gbp' => 10000]]);
+        $product = Product::factory()->create(['pricing_in_pence' => ['gbp' => 10000]]);
         
         // and a 5% voucher
-        $voucher = factory(Voucher::class)->create([
+        $voucher = Voucher::factory()->create([
             'value' => 5,
             'percentage' => true,
             'on_basket' => true,
@@ -42,10 +42,10 @@ class VoucherTest extends TestCase
     function a_voucher_with_value_is_applied_to_basket()
     {
         // we have two products that cost £100
-        $product = factory(Product::class, 2)->create(['pricing_in_pence' => ['gbp' => 10000]]);
+        $product = Product::factory(2)->create(['pricing_in_pence' => ['gbp' => 10000]]);
         
         // and a £5 off voucher
-        $voucher = factory(Voucher::class)->create([
+        $voucher = Voucher::factory()->create([
             'value' => 5,
             'percentage' => false,
             'on_basket' => true,
@@ -67,10 +67,10 @@ class VoucherTest extends TestCase
      **/
     function a_voucher_with_percentage_unit_price_is_applied_to_single_product()
     {
-        $products = factory(Product::class, 3)->create([
+        $products = Product::factory(3)->create([
             'pricing_in_pence' => ['gbp' => 10000],
         ]);
-        $voucher = factory(Voucher::class)->create([
+        $voucher = Voucher::factory()->create([
             'value' => 5,
             'percentage' => true,
             'on_basket' => false,
@@ -95,11 +95,11 @@ class VoucherTest extends TestCase
     function a_single_use_percentage_voucher_will_apply_to_all_applicable_products()
     {
         // we have a £10 and £15 product
-        $product1 = factory(Product::class)->create(['pricing_in_pence' => ['gbp' => 1000]]);
-        $product2 = factory(Product::class)->create(['pricing_in_pence' => ['gbp' => 1500]]);
+        $product1 = Product::factory()->create(['pricing_in_pence' => ['gbp' => 1000]]);
+        $product2 = Product::factory()->create(['pricing_in_pence' => ['gbp' => 1500]]);
         
         // we have a voucher that offers 10% off product1 OR product2
-        $voucher = tap(factory(Voucher::class)->create([
+        $voucher = tap(Voucher::factory()->create([
             'percentage' => true,
             'value' => 10,
             'on_basket' => false,
@@ -125,10 +125,10 @@ class VoucherTest extends TestCase
     function a_voucher_will_not_exceed_the_value_of_the_basket()
     {
         // create a £10 product
-        $product = factory(Product::class)->create(['pricing_in_pence' => ['gbp' => 1000]]);
+        $product = Product::factory()->create(['pricing_in_pence' => ['gbp' => 1000]]);
         
         // and a £20 voucher
-        $voucher = factory(Voucher::class)->create([
+        $voucher = Voucher::factory()->create([
             'value' => 20,
             'percentage' => false,
             'on_basket' => true,
@@ -149,13 +149,13 @@ class VoucherTest extends TestCase
     function a_voucher_with_percentage_quantity_price_is_applied_to_products()
     {
         // we have three products that cost £100
-        $products = factory(Product::class, 3)->create([
+        $products = Product::factory(3)->create([
             'pricing_in_pence' => ['gbp' => 10000],
         ]);
         
         // and a voucher that grants you 5% off the entire quantity
         // of product 1 ONLY. 5% of £100 = £5
-        $voucher = tap(factory(Voucher::class)->create([
+        $voucher = tap(Voucher::factory()->create([
             'value' => 5,
             'percentage' => true,
             'on_basket' => false,

@@ -20,7 +20,6 @@
         "laravel/framework": "^v9.19.0"
     },
     "require-dev": {
-        "laravel/legacy-factories": "^1.3",
         "mockery/mockery": "^1.5",
         "orchestra/testbench": "^7.6",
         "phpunit/phpunit": "^9.5.10"
@@ -28,7 +27,10 @@
     "autoload": {
         "psr-4": {
             "Motomedialab\\Checkout\\": "src"
-        }
+        },
+        "classmap": [
+            "database/factories"
+        ]
     },
     "autoload-dev": {
         "psr-4": {

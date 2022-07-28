@@ -18,7 +18,7 @@ class ProductControllerTest extends TestCase
      **/
     function a_request_requires_a_currency_to_be_defined()
     {
-        $product = factory(Product::class)->create();
+        $product = Product::factory()->create();
         
         $this->getJson(route('checkout.product', $product))
             ->assertJsonValidationErrorFor('currency');
@@ -29,7 +29,7 @@ class ProductControllerTest extends TestCase
      **/
     function a_product_can_be_retrieved_by_id()
     {
-        $product = factory(Product::class)->create();
+        $product = Product::factory()->create();
         
         $response = $this->getJson(route('checkout.product', [$product, 'currency' => 'gbp']));
         
@@ -49,11 +49,11 @@ class ProductControllerTest extends TestCase
      **/
     function a_product_with_children_returns_variants()
     {
-        $product = factory(Product::class)->create([
+        $product = Product::factory()->create([
             'pricing_in_pence' => ['gbp' => 8995, 'eur' => 1100],
             'shipping_in_pence' => ['eur' => 1299, 'gbp' => 999],
         ]);
-        $child = factory(Product::class)->create([
+        $child = Product::factory()->create([
             'parent_product_id' => $product->getKey(),
             'pricing_in_pence' => [],
             'shipping_in_pence' => [],

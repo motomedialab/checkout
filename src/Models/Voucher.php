@@ -3,6 +3,7 @@
 namespace Motomedialab\Checkout\Models;
 
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -23,6 +24,7 @@ use Illuminate\Support\Carbon;
 class Voucher extends Model
 {
     use SoftDeletes;
+    use HasFactory;
     
     protected $casts = [
         'quantity_price' => 'boolean',

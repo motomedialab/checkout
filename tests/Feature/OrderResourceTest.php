@@ -17,7 +17,7 @@ class OrderResourceTest extends TestCase
      **/
     function an_order_is_formatted_as_resource()
     {
-        $product = factory(Product::class)->create([
+        $product = Product::factory()->create([
             'pricing_in_pence' => ['eur' => 10000],
             'shipping_in_pence' => ['eur' => 400],
             'vat_rate' => 20,
@@ -41,11 +41,11 @@ class OrderResourceTest extends TestCase
      **/
     function an_order_resource_outputs_voucher()
     {
-        $product = factory(Product::class)->create([
+        $product = Product::factory()->create([
             'pricing_in_pence' => ['gbp' => 5536],
             'shipping_in_pence' => [],
         ]);
-        $voucher = factory(Voucher::class)->create([
+        $voucher = Voucher::factory()->create([
             'code' => 'BOB3',
             'percentage' => true,
             'value' => 10,

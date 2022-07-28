@@ -35,7 +35,7 @@ class CheckoutControllerTest extends TestCase
      **/
     function an_order_can_be_created()
     {
-        $product = factory(Product::class)->create();
+        $product = Product::factory()->create();
         
         $response = $this->postJson(route('checkout.store'), [
             'currency' => 'gbp',
@@ -68,8 +68,8 @@ class CheckoutControllerTest extends TestCase
     function a_product_with_children_cannot_be_ordered()
     {
         // create a parent product that has one child
-        $product = factory(Product::class)->create();
-        factory(Product::class)->create(['parent_product_id' => $product]);
+        $product = Product::factory()->create();
+        Product::factory()->create(['parent_product_id' => $product]);
         
         $response = $this->postJson(route('checkout.store'), [
             'currency' => 'gbp',
@@ -87,7 +87,7 @@ class CheckoutControllerTest extends TestCase
      **/
     function a_pending_order_can_be_updated()
     {
-        $product = factory(Product::class)->create();
+        $product = Product::factory()->create();
         $order = OrderFactory::make('gbp')->add($product, 1)->save();
         
         $response = $this->putJson(route('checkout.update', ['order' => $order->uuid]), [
@@ -132,12 +132,12 @@ class CheckoutControllerTest extends TestCase
     function a_voucher_can_be_added_to_order()
     {
         
-        $product = factory(Product::class)->create([
+        $product = Product::factory()->create([
             'pricing_in_pence' => ['gbp' => 10000], // make the product £10
             'shipping_in_pence' => [],
         ]);
         
-        $voucher = factory(Voucher::class)->create([
+        $voucher = Voucher::factory()->create([
             'code' => 'ADVANTAGE',
             'on_basket' => true,
             'percentage' => true,
@@ -163,7 +163,7 @@ class CheckoutControllerTest extends TestCase
      **/
     function a_voucher_can_be_removed_from_an_order()
     {
-        $voucher = factory(Voucher::class)->create();
+        $voucher = Voucher::factory()->create();
         $order = OrderFactory::make('gbp')->applyVoucher($voucher)->save();
         
         $response = $this->putJson(route('checkout.update', $order), ['voucher' => null]);
@@ -177,7 +177,7 @@ class CheckoutControllerTest extends TestCase
      **/
     function an_active_order_cannot_be_updated()
     {
-        $product = factory(Product::class)->create();
+        $product = Product::factory()->create();
         $order = OrderFactory::make('gbp')->add($product, 1)->save();
         $order->setStatus(OrderStatus::AWAITING_PAYMENT)->save();
         

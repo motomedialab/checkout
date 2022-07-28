@@ -12,7 +12,7 @@ class ProductTest extends TestCase
      **/
     function we_can_create_a_product()
     {
-        $p = factory(Product::class)->create();
+        $p = Product::factory()->create();
         
         $this->assertInstanceOf(Product::class, $p->fresh());
     }
@@ -22,8 +22,8 @@ class ProductTest extends TestCase
      **/
     function a_product_can_be_owned_by_another_product()
     {
-        $parent = factory(Product::class)->create();
-        $child = factory(Product::class)->create([
+        $parent = Product::factory()->create();
+        $child = Product::factory()->create([
             'parent_product_id' => $parent->getKey(),
         ]);
         
@@ -36,7 +36,7 @@ class ProductTest extends TestCase
     function a_product_can_load_price_based_on_currency()
     {
         /** @var Product $product */
-        $product = factory(Product::class)->create([
+        $product = Product::factory()->create([
             'pricing_in_pence' => [
                 'gbp' => 12410
             ]
@@ -50,7 +50,7 @@ class ProductTest extends TestCase
      **/
     function a_product_with_no_currency_does_something()
     {
-        $product = factory(Product::class)->make([
+        $product = Product::factory()->make([
             'pricing_in_pence' => [
                 'gbp' => 12410
             ]
@@ -64,10 +64,10 @@ class ProductTest extends TestCase
      **/
     function a_variant_loads_price_accounting_for_parent()
     {
-        $parent = factory(Product::class)->create(['pricing_in_pence' => ['gbp' => 12410]]);
+        $parent = Product::factory()->create(['pricing_in_pence' => ['gbp' => 12410]]);
         
         /** @var Product $child */
-        $child = factory(Product::class)->create([
+        $child = Product::factory()->create([
             'parent_product_id' => $parent->getKey(),
             'pricing_in_pence' => ['gbp' => 200]
         ]);
@@ -80,9 +80,9 @@ class ProductTest extends TestCase
      **/
     function a_variant_with_no_price_adopts_parent_price()
     {
-        $parent = factory(Product::class)->create(['pricing_in_pence' => ['gbp' => 12410]]);
+        $parent = Product::factory()->create(['pricing_in_pence' => ['gbp' => 12410]]);
         /** @var Product $child */
-        $child = factory(Product::class)->create([
+        $child = Product::factory()->create([
             'parent_product_id' => $parent->getKey(),
             'pricing_in_pence' => []
         ]);
@@ -95,9 +95,9 @@ class ProductTest extends TestCase
      **/
     function a_variant_with_no_parent_price_adopts_variant_price()
     {
-        $parent = factory(Product::class)->create(['pricing_in_pence' => []]);
+        $parent = Product::factory()->create(['pricing_in_pence' => []]);
         /** @var Product $child */
-        $child = factory(Product::class)->create([
+        $child = Product::factory()->create([
             'parent_product_id' => $parent->getKey(),
             'pricing_in_pence' => ['gbp' => 12410]
         ]);

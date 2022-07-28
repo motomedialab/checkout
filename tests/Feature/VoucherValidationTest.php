@@ -17,7 +17,7 @@ class VoucherValidationTest extends TestCase
     {
         $this->expectException(InvalidVoucherException::class);
         
-        $voucher = factory(Voucher::class)->create(['valid_from' => now()->addDay()]);
+        $voucher = Voucher::factory()->create(['valid_from' => now()->addDay()]);
         
         app(ValidatesVoucher::class)($voucher);
     }
@@ -29,7 +29,7 @@ class VoucherValidationTest extends TestCase
     {
         $this->expectException(InvalidVoucherException::class);
         
-        $voucher = factory(Voucher::class)->create(['valid_until' => now()->subDay()]);
+        $voucher = Voucher::factory()->create(['valid_until' => now()->subDay()]);
         
         app(ValidatesVoucher::class)($voucher);
     }
@@ -41,7 +41,7 @@ class VoucherValidationTest extends TestCase
     {
         $this->expectException(InvalidVoucherException::class);
         
-        $voucher = factory(Voucher::class)->create([
+        $voucher = Voucher::factory()->create([
             'max_uses' => 2,
             'total_uses' => 2,
         ]);

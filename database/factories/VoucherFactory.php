@@ -1,21 +1,29 @@
 <?php
 
-use Faker\Generator as Faker;
+namespace Database\Factories\Motomedialab\Checkout\Models;
+
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Motomedialab\Checkout\Models\Voucher;
 
-$factory->define(Voucher::class, function (Faker $faker) {
-    return [
-        'code' => mt_rand(1000, 9999),
-        'max_uses' => mt_rand(0, 10),
-        'total_uses' => 0,
-        
-        'valid_from' => null,
-        'valid_until' => null,
-        
-        'value' => 10.5,
-        
-        'percentage' => true,
-        'on_basket' => false,
-        'quantity_price' => false,
-    ];
-});
+class VoucherFactory extends Factory
+{
+    protected $model = Voucher::class;
+    
+    public function definition(): array
+    {
+        return [
+            'code' => $this->faker->numberBetween(1000, 9999),
+            'max_uses' => $this->faker->numberBetween(0, 10),
+            'total_uses' => 0,
+            
+            'valid_from' => null,
+            'valid_until' => null,
+            
+            'value' => 10.5,
+            
+            'percentage' => true,
+            'on_basket' => false,
+            'quantity_price' => false,
+        ];
+    }
+}

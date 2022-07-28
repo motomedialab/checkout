@@ -17,7 +17,7 @@ class OrderFactoryTest extends TestCase
      **/
     function a_new_order_can_be_created()
     {
-        $product = factory(Product::class)->create([
+        $product = Product::factory()->create([
             'pricing_in_pence' => [
                 'gbp' => 3000, // £30
             ],
@@ -43,13 +43,13 @@ class OrderFactoryTest extends TestCase
     {
         // seed our previous order
         $order = OrderFactory::make('gbp')
-            ->add(factory(Product::class)->create(), 3)
-            ->add(factory(Product::class)->create(), 1)
+            ->add(Product::factory()->create(), 3)
+            ->add(Product::factory()->create())
             ->save();
         
         // load our order back into our factory & add one more product
         $factory = OrderFactory::fromExisting(Order::findByUuid($order->uuid))
-            ->add(factory(Product::class)->create(), 1);
+            ->add(Product::factory()->create(), 1);
         
         $this->assertInstanceOf(OrderFactory::class, $factory);
         
@@ -66,7 +66,7 @@ class OrderFactoryTest extends TestCase
     {
         $this->expectException(\Exception::class);
         
-        $product = factory(Product::class)->create(['status' => ProductStatus::UNAVAILABLE]);
+        $product = Product::factory()->create(['status' => ProductStatus::UNAVAILABLE]);
         
         OrderFactory::make('gbp')
             ->add($product);
@@ -93,7 +93,7 @@ class OrderFactoryTest extends TestCase
      **/
     function products_can_be_incremented()
     {
-        $product = factory(Product::class)->create();
+        $product = Product::factory()->create();
         
         $factory = OrderFactory::make('gbp')->add($product);
         
