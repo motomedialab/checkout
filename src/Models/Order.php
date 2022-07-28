@@ -164,7 +164,7 @@ class Order extends Model
     protected function amountInPence(): Attribute
     {
         return new Attribute(
-            get: fn($value) => $this->hasBeenSubmitted()
+            get: fn($value) => (int)$this->hasBeenSubmitted()
                 ? $value
                 : app(CalculatesProductsValue::class)($this->products, $this->currency)
         );
@@ -173,7 +173,7 @@ class Order extends Model
     protected function discountInPence(): Attribute
     {
         return new Attribute(
-            get: fn($value) => $this->hasBeenSubmitted() || !$this->voucher
+            get: fn($value) => (int)$this->hasBeenSubmitted() || !$this->voucher
                 ? $value
                 : app(CalculatesDiscountValue::class)($this->products, $this->voucher, $this->currency)
         );
@@ -182,7 +182,7 @@ class Order extends Model
     protected function shippingInPence(): Attribute
     {
         return new Attribute(
-            get: fn($value) => $this->hasBeenSubmitted()
+            get: fn($value) => (int)$this->hasBeenSubmitted()
                 ? $value
                 : app(CalculatesProductsShipping::class)($this->products, $this->currency)
         );
