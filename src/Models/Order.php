@@ -32,6 +32,7 @@ use Ramsey\Uuid\Uuid;
  * @property Money $total
  * @property Collection $products
  * @property ?Voucher $voucher
+ * @property float $vat_rate
  */
 class Order extends Model
 {
@@ -81,6 +82,7 @@ class Order extends Model
             }
             
             // persist our amounts
+            $order->vat_rate = config('checkout.default_vat_rate');
             $order->amount_in_pence = app(CalculatesProductsValue::class)($order->products, $order->currency);
             $order->shipping_in_pence = app(CalculatesProductsShipping::class)($order->products, $order->currency);
             $order->discount_in_pence = $order->voucher ? app(CalculatesDiscountValue::class)($order->products,
@@ -203,6 +205,16 @@ class Order extends Model
     {
         return new Attribute(
             get: fn() => Money::make($this->shipping_in_pence, $this->currency)
+        );
+    }
+    
+    protected function vatRate(): Attribute
+    {
+        return new Attribute(
+            get: fn() => $this->hasBeenSubmitted()
+                ? $this->vat_rate
+                : config('checkout.default_vat_rate'),
+            set: fn($value) => $value,
         );
     }
     

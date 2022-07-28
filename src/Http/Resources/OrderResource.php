@@ -16,6 +16,7 @@ class OrderResource extends JsonResource
             'id' => $this->resource->uuid,
             'currency' => $this->resource->currency,
             'products' => ProductResource::collection($this->resource->products()->get())->toArray($request),
+            'vat_rate' => $this->resource->hasBeenSubmitted() ? $this->resource->vat_rate : config('checkout.default_vat_rate'),
             'totals' => [
                 'amount_in_pence' => $this->resource->amount_in_pence,
                 'shipping_in_pence' => $this->resource->shipping_in_pence,

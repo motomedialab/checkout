@@ -25,8 +25,8 @@ return new class extends Migration {
             
             $table->float('vat_rate')->default(0);
             
-            $table->json('pricing_in_pence')->default('[]');
-            $table->json('shipping_in_pence')->default('[]');
+            $table->json('pricing')->default('[]');
+            $table->json('shipping')->default('[]');
             
             $table->timestamps();
             $table->softDeletes();

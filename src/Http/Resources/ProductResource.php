@@ -27,7 +27,7 @@ class ProductResource extends JsonResource
             $voucher = new Voucher(['value' => 0]);
         }
         
-        return [
+        return array_filter([
             'id' => $this->resource->getKey(),
             'name' => $this->resource->name,
             'currency' => $currency,
@@ -44,6 +44,6 @@ class ProductResource extends JsonResource
             'available' => $this->resource->status === ProductStatus::AVAILABLE,
             'children' => static::collection($this->whenLoaded('children')),
             'parent' => $this->whenLoaded('parent', fn() => static::make($this->resource->parent)),
-        ];
+        ]);
     }
 }

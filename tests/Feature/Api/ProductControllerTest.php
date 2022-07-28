@@ -49,9 +49,14 @@ class ProductControllerTest extends TestCase
      **/
     function a_product_with_children_returns_variants()
     {
-        $product = factory(Product::class)->create();
-        factory(Product::class)->create([
-            'parent_product_id' => $product->getKey()
+        $product = factory(Product::class)->create([
+            'pricing_in_pence' => ['gbp' => 8995, 'eur' => 1100],
+            'shipping_in_pence' => ['eur' => 1299, 'gbp' => 999],
+        ]);
+        $child = factory(Product::class)->create([
+            'parent_product_id' => $product->getKey(),
+            'pricing_in_pence' => [],
+            'shipping_in_pence' => [],
         ]);
         
         $response = $this->getJson(route('checkout.product', [$product, 'currency' => 'gbp']));

@@ -42,4 +42,11 @@ return [
      * The default currency that should be used
      */
     'default_currency' => 'GBP',
+    
+    /**
+     * Default VAT rate
+     *
+     * Percentage value, the default VAT rate to inherit
+     */
+    'default_vat_rate' => 20,
 ];
