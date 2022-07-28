@@ -159,7 +159,7 @@ class Product extends Model
         return new Attribute(
             get: fn($value) => $this->orderPivot?->order->hasBeenSubmitted()
                 ? $this->orderPivot->vat_rate
-                : $value
+                : (int)max($this->parent?->vat_rate, $value)
         );
     }
 }

@@ -31,17 +31,17 @@ class ProductResource extends JsonResource
             'id' => $this->resource->getKey(),
             'name' => $this->resource->name,
             'currency' => $currency,
-            'quantity' => $this->whenLoaded('orderPivot', fn() => $this->resource->orderPivot->quantity),
-            'pricing' => VatCalculator::make(
-                $this->resource->price($currency)?->toPence(),
-                $this->resource->vat_rate
-            ),
+            'quantity' => $this->resource->orderPivot?->quantity,
+            'vat_rate' => $this->resource->vat_rate,
+            'available' => $this->resource->status === ProductStatus::AVAILABLE,
             'discount_in_pence' => $this->when(
                 $voucher instanceof Voucher,
                 fn() => app(CalculatesDiscountValue::class)(collect([$this->resource]), $voucher, $currency)
             ),
-            'vat_rate' => $this->resource->vat_rate,
-            'available' => $this->resource->status === ProductStatus::AVAILABLE,
+            'pricing' => VatCalculator::make(
+                $this->resource->price($currency)?->toPence(),
+                $this->resource->vat_rate
+            ),
             'children' => static::collection($this->whenLoaded('children')),
             'parent' => $this->whenLoaded('parent', fn() => static::make($this->resource->parent)),
         ]);
