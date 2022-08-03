@@ -101,12 +101,12 @@ class OrderFactory
         }
         
         
-        if ($this->voucher || $this->order->voucher) {
+        if ($this->voucher) {
             
             $voucherDifference = app(ComparesVoucher::class)(
                 $this->basket,
                 $this->order->currency,
-                $this->voucher ?? $this->order->voucher,
+                $this->voucher,
                 $voucher
             );
             
