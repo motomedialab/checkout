@@ -14,7 +14,7 @@ class PurgeHistoricOrders extends Command
     
     public function handle()
     {
-        $count = DB::table(config('checkout.table.orders'))
+        $count = DB::table(config('checkout.tables.orders'))
             ->where('status', OrderStatus::PENDING->value)
             ->where('updated_at', '<=', now()->subDays(90))
             ->delete();
