@@ -10,6 +10,7 @@ use Motomedialab\Checkout\Actions\CalculateProductsShipping;
 use Motomedialab\Checkout\Actions\CalculateProductsValue;
 use Motomedialab\Checkout\Actions\CompareVoucher;
 use Motomedialab\Checkout\Actions\ValidateVoucher;
+use Motomedialab\Checkout\Console\PurgeHistoricOrders;
 use Motomedialab\Checkout\Contracts\CalculatesDiscountValue;
 use Motomedialab\Checkout\Contracts\CalculatesProductsShipping;
 use Motomedialab\Checkout\Contracts\CalculatesProductsValue;
@@ -34,6 +35,9 @@ class CheckoutServiceProvider extends ServiceProvider
                 __DIR__.'/../config/config.php' => config_path('checkout.php'),
             ], 'config');
         }
+    
+        // initialise commands
+        $this->commands(PurgeHistoricOrders::class);
         
         $this->setupRouteModelBindings();
     }
