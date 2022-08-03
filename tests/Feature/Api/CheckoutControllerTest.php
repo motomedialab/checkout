@@ -8,6 +8,7 @@ namespace Motomedialab\Checkout\Tests\Feature\Api;
 
 use Motomedialab\Checkout\Enums\OrderStatus;
 use Motomedialab\Checkout\Enums\ProductStatus;
+use Motomedialab\Checkout\Exceptions\VoucherException;
 use Motomedialab\Checkout\Factories\OrderFactory;
 use Motomedialab\Checkout\Models\Order;
 use Motomedialab\Checkout\Models\Product;
@@ -120,6 +121,23 @@ class CheckoutControllerTest extends TestCase
             'voucher' => $voucher->code
         ])->assertStatus(200)
             ->assertJson(['data' => ['voucher' => $voucher->code]]);
+    }
+    
+    /**
+     * @test
+     **/
+    function a_voucher_of_a_lesser_value_throws_error()
+    {
+        $this->expectException(VoucherException::class);
+        $this->expectExceptionMessage('The voucher you are trying to apply is worth less than your current voucher');
+        
+        $product = Product::factory()->create();
+        $voucher = Voucher::factory()->create(['on_basket' => true,'percentage' => false,'value' => 10,]); // 10 GBP voucher.
+        $voucher2 = Voucher::factory()->create(['on_basket' => true, 'percentage' => false, 'value' => 3]); // 3 GBP voucher.
+        $factory = tap(OrderFactory::make('gbp')->add($product, 1)->applyVoucher($voucher))->save();
+        
+        // now apply the lesser value voucher...
+        $factory->applyVoucher($voucher2);
     }
     
     /**

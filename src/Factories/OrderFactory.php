@@ -3,12 +3,11 @@
 namespace Motomedialab\Checkout\Factories;
 
 use Illuminate\Support\Collection;
-use Motomedialab\Checkout\Contracts\CalculatesDiscountValue;
-use Motomedialab\Checkout\Contracts\CalculatesProductsShipping;
-use Motomedialab\Checkout\Contracts\CalculatesProductsValue;
+use Motomedialab\Checkout\Contracts\ComparesVoucher;
 use Motomedialab\Checkout\Contracts\ValidatesVoucher;
 use Motomedialab\Checkout\Enums\ProductStatus;
 use Motomedialab\Checkout\Exceptions\CheckoutException;
+use Motomedialab\Checkout\Exceptions\InvalidVoucherException;
 use Motomedialab\Checkout\Exceptions\UnsupportedCurrencyException;
 use Motomedialab\Checkout\Models\Order;
 use Motomedialab\Checkout\Models\Product;
@@ -60,10 +59,11 @@ class OrderFactory
         }
         
         if ($product->status === ProductStatus::UNAVAILABLE) {
-            throw new CheckoutException($product->name . ' is not available for purchase');
+            throw new CheckoutException($product->name.' is not available for purchase');
         }
         
-        $product->quantity = ($increment ? $this->basket->firstWhere('id', $product->getKey())?->quantity : 0) + $quantity;
+        $product->quantity = ($increment ? $this->basket->firstWhere('id',
+                $product->getKey())?->quantity : 0) + $quantity;
         
         // should this item be removed from the basket?
         if ($product->quantity === 0 && false === $increment) {
@@ -98,6 +98,23 @@ class OrderFactory
             return $this;
         }
         
+        
+        if ($this->voucher) {
+            
+            $voucherDifference = app(ComparesVoucher::class)(
+                $this->basket,
+                $this->order->currency,
+                $this->voucher,
+                $voucher
+            );
+            
+            if ($voucherDifference < 0) {
+                throw new InvalidVoucherException(
+                    'The voucher you are trying to apply is worth less than your current voucher'
+                );
+            }
+        }
+        
         if (app(ValidatesVoucher::class)($voucher, $this->basket)) {
             $this->voucher = $voucher;
         }
@@ -129,7 +146,7 @@ class OrderFactory
         $this->order->voucher()->associate($this->voucher);
         $this->order->load('products');
         
-        return tap($this->order)->save();
+        return $this->order = tap($this->order)->save();
     }
     
 }
