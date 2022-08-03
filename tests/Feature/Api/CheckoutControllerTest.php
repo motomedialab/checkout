@@ -128,16 +128,20 @@ class CheckoutControllerTest extends TestCase
      **/
     function a_voucher_of_a_lesser_value_throws_error()
     {
-        $this->expectException(VoucherException::class);
-        $this->expectExceptionMessage('The voucher you are trying to apply is worth less than your current voucher');
-        
+        // create an order
         $product = Product::factory()->create();
-        $voucher = Voucher::factory()->create(['on_basket' => true,'percentage' => false,'value' => 10,]); // 10 GBP voucher.
-        $voucher2 = Voucher::factory()->create(['on_basket' => true, 'percentage' => false, 'value' => 3]); // 3 GBP voucher.
-        $factory = tap(OrderFactory::make('gbp')->add($product, 1)->applyVoucher($voucher))->save();
+        $order = OrderFactory::make('gbp')->add($product, 1)
+            ->applyVoucher(Voucher::factory()->create(['on_basket' => true,'percentage' => false,'value' => 10,]))
+            ->save();
         
-        // now apply the lesser value voucher...
-        $factory->applyVoucher($voucher2);
+        // create a lesser valued voucher
+        $voucher = Voucher::factory()->create(['on_basket' => true,'percentage' => false,'value' => 3]);
+        
+        // and try to apply it...
+        $this
+            ->putJson(route('checkout.update', $order), ['voucher' => $voucher->code])
+            ->assertStatus(400)
+            ->assertJsonPath('message', 'The voucher you are trying to apply is worth less than your current voucher');
     }
     
     /**
