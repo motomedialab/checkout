@@ -21,7 +21,9 @@ class OrderFactory
     public function __construct(protected Order $order)
     {
         $this->basket = collect();
-        
+    
+        // hydrate our data.
+        $this->voucher = $order->voucher;
         $this->order->products->each(function (Product $product) {
             $this->add($product, $product->orderPivot->quantity);
         });
@@ -49,7 +51,7 @@ class OrderFactory
     
     public static function fromExisting(Order $order): OrderFactory
     {
-        return new self ($order);
+        return new self;
     }
     
     public function add(Product $product, int $quantity = 1, bool $increment = false): static
