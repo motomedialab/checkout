@@ -65,6 +65,12 @@ class OrderFactory
         
         $product->quantity = ($increment ? $this->basket->firstWhere('id', $product->getKey())?->quantity : 0) + $quantity;
         
+        // should this item be removed from the basket?
+        if ($product->quantity === 0 && false === $increment) {
+            $this->remove($product);
+            return $this;
+        }
+        
         $this->remove($product);
         $this->basket->push($product);
         

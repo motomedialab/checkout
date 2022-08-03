@@ -154,6 +154,6 @@ class CheckoutController
             $product->setAttribute('quantity',
                 $productCollection->firstWhere('id', $product->getKey())['quantity'] ?? 1);
             return $product;
-        })->filter(fn(Product $product) => $product->quantity > 0);
+        });
     }
 }

@@ -85,6 +85,27 @@ class CheckoutControllerTest extends TestCase
     /**
      * @test
      **/
+    function setting_a_quantity_to_zero_without_increment_removes_it()
+    {
+        $product = Product::factory()->create();
+        $order = OrderFactory::make('gbp')->add($product, 1)->save();
+        
+        $response = $this->putJson(route('checkout.update', $order), [
+            'increment' => false,
+            'products' => [
+                [
+                    'id' => $product->getKey(),
+                    'quantity' => 0,
+                ]
+            ]
+        ]);
+        
+        $this->assertCount(0, $order->fresh()->products);
+    }
+    
+    /**
+     * @test
+     **/
     function a_pending_order_can_be_updated()
     {
         $product = Product::factory()->create();
