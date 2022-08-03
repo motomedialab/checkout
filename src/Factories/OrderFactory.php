@@ -46,12 +46,12 @@ class OrderFactory
             throw new UnsupportedCurrencyException();
         }
         
-        return new self(new Order(['currency' => $currency]));
+        return new static(new Order(['currency' => $currency]));
     }
     
     public static function fromExisting(Order $order): OrderFactory
     {
-        return new self;
+        return new static($order);
     }
     
     public function add(Product $product, int $quantity = 1, bool $increment = false): static
