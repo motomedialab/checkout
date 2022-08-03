@@ -106,6 +106,25 @@ class CheckoutControllerTest extends TestCase
     /**
      * @test
      **/
+    function a_voucher_can_be_applied_to_an_existing_order()
+    {
+        $product = Product::factory()->create();
+        $order = OrderFactory::make('gbp')->add($product, 1)->save();
+        $voucher = Voucher::factory()->create([
+            'on_basket' => true,
+            'percentage' => false,
+            'value' => 10,
+        ]); // 10 GBP voucher.
+        
+        $response = $this->putJson(route('checkout.update', $order), [
+            'voucher' => $voucher->code
+        ])->assertStatus(200)
+            ->assertJson(['data' => ['voucher' => $voucher->code]]);
+    }
+    
+    /**
+     * @test
+     **/
     function a_pending_order_can_be_updated()
     {
         $product = Product::factory()->create();
