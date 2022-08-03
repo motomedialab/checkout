@@ -112,7 +112,7 @@ class CheckoutController
                     }
                 }
             ],
-            'products.*.quantity' => ['nullable', 'numeric', 'min:1', 'max:50'],
+            'products.*.quantity' => ['nullable', 'numeric', 'min:0', 'max:50'],
             'voucher' => [
                 'nullable',
                 function ($key, $value, $fail) {
@@ -154,6 +154,6 @@ class CheckoutController
             $product->setAttribute('quantity',
                 $productCollection->firstWhere('id', $product->getKey())['quantity'] ?? 1);
             return $product;
-        });
+        })->filter(fn(Product $product) => $product->quantity > 0);
     }
 }
