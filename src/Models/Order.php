@@ -211,8 +211,8 @@ class Order extends Model
     protected function vatRate(): Attribute
     {
         return new Attribute(
-            get: fn() => $this->hasBeenSubmitted()
-                ? $this->vat_rate
+            get: fn($value) => $this->hasBeenSubmitted()
+                ? $value
                 : config('checkout.default_vat_rate'),
             set: fn($value) => $value,
         );

@@ -68,7 +68,6 @@ class CheckoutServiceProvider extends ServiceProvider
         Route::bind('order', fn(string $uuid) => Order::query()
             ->with(['products', 'voucher'])
             ->where('uuid', $uuid)
-            ->where('status', OrderStatus::PENDING->value)
             ->firstOrFail());
     }
 }
