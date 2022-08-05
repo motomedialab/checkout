@@ -20,9 +20,14 @@ enum OrderStatus: string
         'cancelled' => 20,
     ];
     
+    public function eq(OrderStatus $status): bool
+    {
+        return $this === $status;
+    }
+    
     public function gte(OrderStatus $status): bool
     {
-        return $this->gt($status) || $status === $this;
+        return $this->gt($status) || $this->eq($status);
     }
     
     public function gt(OrderStatus $status): bool
@@ -37,7 +42,7 @@ enum OrderStatus: string
     
     public function lte(OrderStatus $status): bool
     {
-        return $this->lt($status) || $status === $this;
+        return $this->lt($status) || $this->eq($status);
     }
     
     
