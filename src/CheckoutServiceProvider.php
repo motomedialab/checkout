@@ -2,7 +2,6 @@
 
 namespace Motomedialab\Checkout;
 
-use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Motomedialab\Checkout\Actions\CalculateDiscountValue;
@@ -16,7 +15,6 @@ use Motomedialab\Checkout\Contracts\CalculatesProductsShipping;
 use Motomedialab\Checkout\Contracts\CalculatesProductsValue;
 use Motomedialab\Checkout\Contracts\ComparesVoucher;
 use Motomedialab\Checkout\Contracts\ValidatesVoucher;
-use Motomedialab\Checkout\Enums\OrderStatus;
 use Motomedialab\Checkout\Models\Order;
 
 class CheckoutServiceProvider extends ServiceProvider
@@ -35,7 +33,7 @@ class CheckoutServiceProvider extends ServiceProvider
                 __DIR__.'/../config/config.php' => config_path('checkout.php'),
             ], 'config');
         }
-    
+        
         // initialise commands
         $this->commands(PurgeHistoricOrders::class);
         
@@ -65,7 +63,7 @@ class CheckoutServiceProvider extends ServiceProvider
     
     protected function setupRouteModelBindings()
     {
-        Route::bind('order', fn(string $uuid) => Order::query()
+        Route::bind('order', fn(string $uuid) => config('checkout.models.order')::query()
             ->with(['products', 'voucher'])
             ->where('uuid', $uuid)
             ->firstOrFail());

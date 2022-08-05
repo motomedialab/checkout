@@ -26,6 +26,15 @@ return [
     ],
     
     /**
+     * Models
+     *
+     * The models to use for various functionality.
+     */
+    'models' => [
+        'order' => Motomedialab\Checkout\Models\Order::class,
+    ],
+    
+    /**
      * Currencies
      *
      * The currencies available to the system
