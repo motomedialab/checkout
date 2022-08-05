@@ -151,9 +151,9 @@ class OrderFactory
         );
         
         $this->order->voucher()->associate($this->voucher);
-        $this->order->load('products');
+        $this->order->save();
         
-        return $this->order = tap($this->order)->save();
+        return $this->order = $this->order->refresh();
     }
     
 }

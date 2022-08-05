@@ -76,22 +76,17 @@ class Order extends Model
         // enforce a UUID for our order
         static::creating(fn($model) => $model->uuid = Str::uuid()->toString());
         
-        static::updating(function (Order $order) {
+        static::saving(function (Order $order) {
             
             if ($order->hasBeenSubmitted()) {
                 return true;
             }
             
-            // temporarily restore our status.
-            $oldStatus = $order->status;
-            $order->status = OrderStatus::PENDING;
-            
             // persist our amounts
             $order->vat_rate = config('checkout.default_vat_rate');
-            $order->amount_in_pence = $this->amount->toPence();
-            $order->shipping_in_pence = $this->shipping->toPence();
-            $order->discount_in_pence = $this->discount->toPence();
-            $order->status = $oldStatus;
+            $order->amount_in_pence = $order->amount->toPence();
+            $order->shipping_in_pence = $order->shipping->toPence();
+            $order->discount_in_pence = $order->discount->toPence();
             
             return true;
         });

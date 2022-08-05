@@ -95,6 +95,10 @@ class Product extends Model
      */
     public function price(string $currency): Money|null
     {
+        if ($this->orderPivot?->order->hasBeenSubmitted()) {
+            return Money::make($this->orderPivot->amount_in_pence, $this->orderPivot->order->currency);
+        }
+        
         if ($this->parent && $this->parent->availableInCurrency($currency)) {
             return $this->parent->price($currency)
                 ->add($this->pricing_in_pence->get($currency) ?? Money::make(0, $currency));
