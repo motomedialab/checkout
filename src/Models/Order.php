@@ -161,6 +161,11 @@ class Order extends Model
         return $this;
     }
     
+    public function hasBeenSubmitted(): bool
+    {
+        return $this->exists && $this->status->gt(OrderStatus::PENDING);
+    }
+    
     protected function amountInPence(): Attribute
     {
         return new Attribute(
@@ -186,11 +191,6 @@ class Order extends Model
                 ? $value
                 : app(CalculatesProductsShipping::class)($this->products, $this->currency)
         );
-    }
-    
-    public function hasBeenSubmitted(): bool
-    {
-        return $this->exists && $this->status && $this->status !== OrderStatus::PENDING;
     }
     
     

@@ -149,11 +149,10 @@ class OrderFactory
                 ];
             })->toArray()
         );
-        
+    
         $this->order->voucher()->associate($this->voucher);
-        $this->order->save();
         
-        return $this->order = $this->order->refresh();
+        return $this->order = tap($this->order->refresh())->save();
     }
     
 }
