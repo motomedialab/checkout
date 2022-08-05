@@ -72,6 +72,14 @@ class Money implements \Stringable
         return $this;
     }
     
+    public function subtract(int|Money $amount): static
+    {
+        $this->priceInPence -= $amount instanceof Money
+            ? $amount->toPence() : $amount;
+        
+        return $this;
+    }
+    
     public function toPence(): int
     {
         return $this->priceInPence;

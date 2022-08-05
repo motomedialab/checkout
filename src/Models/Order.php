@@ -30,6 +30,7 @@ use Ramsey\Uuid\Uuid;
  * @property Money $amount
  * @property Money $shipping
  * @property Money $total
+ * @property Money $discount
  * @property Collection $products
  * @property ?Voucher $voucher
  * @property float $vat_rate
@@ -208,6 +209,20 @@ class Order extends Model
         );
     }
     
+    protected function discount(): Attribute
+    {
+        return new Attribute(
+            get: fn() => Money::make($this->discount_in_pence, $this->currency)
+        );
+    }
+    
+    protected function total(): Attribute
+    {
+        return new Attribute(
+            get: fn() => $this->amount->add($this->shipping)->subtract($this->discount)
+        );
+    }
+    
     protected function vatRate(): Attribute
     {
         return new Attribute(
@@ -215,13 +230,6 @@ class Order extends Model
                 ? $this->vat_rate
                 : config('checkout.default_vat_rate'),
             set: fn($value) => $value,
-        );
-    }
-    
-    protected function total(): Attribute
-    {
-        return new Attribute(
-            get: fn() => $this->amount->add($this->shipping)
         );
     }
 }
