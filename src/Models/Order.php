@@ -197,21 +197,21 @@ class Order extends Model
     protected function amount(): Attribute
     {
         return new Attribute(
-            get: fn() => Money::make($this->amount_in_pence, $this->currency)
+            get: fn() => Money::make($this->amount_in_pence ?? 0, $this->currency)
         );
     }
     
     protected function shipping(): Attribute
     {
         return new Attribute(
-            get: fn() => Money::make($this->shipping_in_pence, $this->currency)
+            get: fn() => Money::make($this->shipping_in_pence ?? 0, $this->currency)
         );
     }
     
     protected function discount(): Attribute
     {
         return new Attribute(
-            get: fn() => Money::make($this->discount_in_pence, $this->currency)
+            get: fn() => Money::make($this->discount_in_pence ?? 0, $this->currency)
         );
     }
     
