@@ -5,6 +5,7 @@ namespace Motomedialab\Checkout\Factories;
 use Illuminate\Support\Collection;
 use Motomedialab\Checkout\Contracts\ComparesVoucher;
 use Motomedialab\Checkout\Contracts\ValidatesVoucher;
+use Motomedialab\Checkout\Enums\OrderStatus;
 use Motomedialab\Checkout\Enums\ProductStatus;
 use Motomedialab\Checkout\Exceptions\CheckoutException;
 use Motomedialab\Checkout\Exceptions\InvalidVoucherException;
@@ -46,7 +47,10 @@ class OrderFactory
             throw new UnsupportedCurrencyException();
         }
         
-        return new static(new Order(['currency' => $currency]));
+        return new static(new Order([
+            'currency' => $currency,
+            'status' => OrderStatus::PENDING,
+        ]));
     }
     
     public static function fromExisting(Order $order): OrderFactory
@@ -131,6 +135,7 @@ class OrderFactory
     
     public function save(): Order
     {
+        $this->order->setStatus(OrderStatus::PENDING);
         $this->order->save();
         
         $this->order->products()->sync(

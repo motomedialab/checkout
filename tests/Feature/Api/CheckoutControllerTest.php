@@ -244,7 +244,7 @@ class CheckoutControllerTest extends TestCase
         $order->setStatus(OrderStatus::AWAITING_PAYMENT)->save();
         
         $this->putJson(route('checkout.update', ['order' => $order->uuid]))
-            ->assertStatus(404);
+            ->assertStatus(403);
     }
     
     /**

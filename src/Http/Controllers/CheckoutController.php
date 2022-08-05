@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Motomedialab\Checkout\Contracts\ValidatesVoucher;
+use Motomedialab\Checkout\Enums\OrderStatus;
 use Motomedialab\Checkout\Exceptions\UnsupportedCurrencyException;
 use Motomedialab\Checkout\Factories\OrderFactory;
 use Motomedialab\Checkout\Http\Resources\OrderResource;
@@ -31,6 +32,7 @@ class CheckoutController
             $factory = OrderFactory::make(
                 $validated['currency'] ?? config('checkout.default_currency')
             );
+            
         } catch (UnsupportedCurrencyException $e) {
             throw ValidationException::withMessages(['currency' => 'Sorry, this currency isn\'t supported yet.']);
         }
@@ -40,6 +42,10 @@ class CheckoutController
     
     public function update(Request $request, Order $order): OrderResource
     {
+        if ($order->status->gt(OrderStatus::PENDING)) {
+            abort(403, 'You cannot update an order that is no longer pending');
+        }
+        
         $validated = $this->validate($request, [
             'increment' => ['nullable', 'boolean'],
         ]);
