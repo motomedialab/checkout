@@ -82,12 +82,16 @@ class Order extends Model
                 return true;
             }
             
+            // temporarily restore our status.
+            $oldStatus = $order->status;
+            $order->status = OrderStatus::PENDING;
+            
             // persist our amounts
             $order->vat_rate = config('checkout.default_vat_rate');
-            $order->amount_in_pence = app(CalculatesProductsValue::class)($order->products, $order->currency);
-            $order->shipping_in_pence = app(CalculatesProductsShipping::class)($order->products, $order->currency);
-            $order->discount_in_pence = $order->voucher ? app(CalculatesDiscountValue::class)($order->products,
-                $order->voucher, $order->currency) : 0;
+            $order->amount_in_pence = $this->amount->toPence();
+            $order->shipping_in_pence = $this->shipping->toPence();
+            $order->discount_in_pence = $this->discount->toPence();
+            $order->status = $oldStatus;
             
             return true;
         });
