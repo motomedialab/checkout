@@ -19,9 +19,10 @@ class OrderResource extends JsonResource
             'voucher' => $this->resource->voucher?->code,
             'products' => ProductResource::collection($this->resource->products()->get())->toArray($request),
             'totals' => [
-                'amount_in_pence' => $this->resource->amount_in_pence,
-                'shipping_in_pence' => $this->resource->shipping_in_pence,
-                'discount_in_pence' => $this->resource->discount_in_pence ?: null,
+                'amount_in_pence' => $this->resource->amount->toPence(),
+                'shipping_in_pence' => $this->resource->shipping->toPence(),
+                'discount_in_pence' => $this->resource->discount->toPence(),
+                'total_in_pence' => $this->resource->total->toPence()
             ],
         ];
     }
