@@ -17,6 +17,7 @@ class OrderResource extends JsonResource
             'currency' => $this->resource->currency,
             'vat_rate' => $this->resource->vat_rate,
             'voucher' => $this->resource->voucher?->code,
+            'recipient_address' => $this->resource->recipient_address,
             'products' => ProductResource::collection($this->resource->products()->get())->toArray($request),
             'totals' => [
                 'amount_in_pence' => $this->resource->amount->toPence(),

@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Support\Str;
 use Motomedialab\Checkout\Contracts\CalculatesDiscountValue;
 use Motomedialab\Checkout\Contracts\CalculatesProductsShipping;
 use Motomedialab\Checkout\Contracts\CalculatesProductsValue;
@@ -17,13 +18,12 @@ use Motomedialab\Checkout\Events\OrderStatusUpdated;
 use Motomedialab\Checkout\Exceptions\InvalidVoucherException;
 use Motomedialab\Checkout\Helpers\Money;
 use Motomedialab\Checkout\Models\Pivots\OrderPivot;
-use Ramsey\Uuid\Lazy\LazyUuidFromString;
-use Ramsey\Uuid\Uuid;
 
 /**
  * @property OrderStatus $status
  * @property string $currency
- * @property LazyUuidFromString $uuid
+ * @property string $uuid
+ * @property array $recipient_address
  * @property integer $amount_in_pence
  * @property integer $discount_in_pence
  * @property integer $shipping_in_pence
@@ -74,7 +74,7 @@ class Order extends Model
         parent::boot();
         
         // enforce a UUID for our order
-        static::creating(fn($model) => $model->uuid = Uuid::uuid4());
+        static::creating(fn($model) => $model->uuid = Str::uuid()->toString());
         
         static::updating(function (Order $order) {
             
@@ -165,7 +165,7 @@ class Order extends Model
     protected function amountInPence(): Attribute
     {
         return new Attribute(
-            get: fn($value) => (int)$this->hasBeenSubmitted()
+            get: fn($value) => (int) $this->hasBeenSubmitted()
                 ? $value
                 : app(CalculatesProductsValue::class)($this->products, $this->currency)
         );
@@ -174,7 +174,7 @@ class Order extends Model
     protected function discountInPence(): Attribute
     {
         return new Attribute(
-            get: fn($value) => (int)$this->hasBeenSubmitted() || !$this->voucher
+            get: fn($value) => (int) $this->hasBeenSubmitted() || !$this->voucher
                 ? $value
                 : app(CalculatesDiscountValue::class)($this->products, $this->voucher, $this->currency)
         );
@@ -183,7 +183,7 @@ class Order extends Model
     protected function shippingInPence(): Attribute
     {
         return new Attribute(
-            get: fn($value) => (int)$this->hasBeenSubmitted()
+            get: fn($value) => (int) $this->hasBeenSubmitted()
                 ? $value
                 : app(CalculatesProductsShipping::class)($this->products, $this->currency)
         );
