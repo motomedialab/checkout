@@ -3,6 +3,10 @@
 namespace Motomedialab\Checkout\Factories;
 
 use Illuminate\Support\Collection;
+use Motomedialab\Checkout\Contracts\CalculatesDiscountValue;
+use Motomedialab\Checkout\Contracts\CalculatesProductsShipping;
+use Motomedialab\Checkout\Contracts\CalculatesProductsValue;
+use Motomedialab\Checkout\Contracts\CheckoutUser;
 use Motomedialab\Checkout\Contracts\ComparesVoucher;
 use Motomedialab\Checkout\Contracts\ValidatesVoucher;
 use Motomedialab\Checkout\Enums\OrderStatus;
@@ -24,7 +28,7 @@ class OrderFactory
         $this->basket = collect();
     
         // hydrate our data.
-        $this->voucher = $order->voucher;
+        $this->voucher = $this->order->voucher;
         $this->order->products->each(function (Product $product) {
             $this->add($product, $product->orderPivot->quantity);
         });
@@ -97,6 +101,13 @@ class OrderFactory
         return $this;
     }
     
+    public function setOwner(CheckoutUser $user): static
+    {
+        $this->order->owner()->associate($user);
+        
+        return $this;
+    }
+    
     public function applyVoucher(?Voucher $voucher): static
     {
         if (is_null($voucher)) {
@@ -133,10 +144,21 @@ class OrderFactory
         return $this->applyVoucher(null);
     }
     
-    public function save(): Order
+    public function save(?OrderStatus $status = OrderStatus::PENDING): Order
     {
+        // persist our amounts
         $this->order->setStatus(OrderStatus::PENDING);
-        $this->order->save();
+        $this->order->forceFill([
+            'vat_rate' => config('checkout.default_vat_rate'),
+            'amount_in_pence' => app(CalculatesProductsValue::class)($this->basket, $this->order->currency),
+            'shipping_in_pence' => app(CalculatesProductsShipping::class)($this->basket, $this->order->currency),
+            'discount_in_pence' => $this->voucher
+                ? app(CalculatesDiscountValue::class)($this->basket, $this->voucher, $this->order->currency)
+                : 0,
+        ]);
+        
+        $this->order->setStatus($status);
+        $this->order->voucher()->associate($this->voucher);
         
         $this->order->products()->sync(
             $this->basket->mapWithKeys(function (Product $product, int $key) {
@@ -150,7 +172,6 @@ class OrderFactory
             })->toArray()
         );
         
-        $this->order->voucher()->associate($this->voucher);
         $this->order->save();
         
         return $this->order->refresh();

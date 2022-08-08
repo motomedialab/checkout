@@ -45,7 +45,10 @@ class Order extends Model
         'discount_in_pence' => 'integer',
     ];
     
-    protected $guarded = [];
+    protected $fillable = [
+        'currency',
+        'status',
+    ];
     
     public function __construct(array $attributes = [])
     {
@@ -75,21 +78,6 @@ class Order extends Model
         
         // enforce a UUID for our order
         static::creating(fn($model) => $model->uuid = Str::uuid()->toString());
-        
-        static::saving(function (Order $order) {
-            
-            if ($order->hasBeenSubmitted()) {
-                return true;
-            }
-            
-            // persist our amounts
-            $order->vat_rate = config('checkout.default_vat_rate');
-            $order->amount_in_pence = $order->amount->toPence();
-            $order->shipping_in_pence = $order->shipping->toPence();
-            $order->discount_in_pence = $order->discount->toPence();
-            
-            return true;
-        });
     }
     
     /**
