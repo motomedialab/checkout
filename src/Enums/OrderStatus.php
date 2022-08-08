@@ -2,8 +2,6 @@
 
 namespace Motomedialab\Checkout\Enums;
 
-use Motomedialab\Checkout\Models\Order;
-
 enum OrderStatus: string
 {
     case SHIPPED = 'shipped';
@@ -45,5 +43,8 @@ enum OrderStatus: string
         return $this->lt($status) || $this->eq($status);
     }
     
-    
+    public static function toArray(): array
+    {
+        return array_map(fn(OrderStatus $enum) => $enum->value, OrderStatus::cases());
+    }
 }

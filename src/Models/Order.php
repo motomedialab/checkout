@@ -154,6 +154,11 @@ class Order extends Model
         return $this->exists && $this->status->gt(OrderStatus::PENDING);
     }
     
+    protected function currencySymbol(): Attribute
+    {
+        return config("checkout.currencies.{$this->currency}", '£');
+    }
+    
     protected function amountInPence(): Attribute
     {
         return new Attribute(
