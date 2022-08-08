@@ -80,6 +80,20 @@ class Money implements \Stringable
         return $this;
     }
     
+    public function times(int $multiplier)
+    {
+        $this->priceInPence *= $multiplier;
+        
+        return $this;
+    }
+    
+    public function divide(int $multiplier)
+    {
+        $this->priceInPence /= $multiplier;
+        
+        return $this;
+    }
+    
     public function toPence(): int
     {
         return $this->priceInPence;
