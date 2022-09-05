@@ -8,6 +8,7 @@ use Illuminate\Support\Stringable;
 class Money implements \Stringable
 {
     private Stringable $stringable;
+    private string $inFormat;
     
     protected array $symbols = [
         'GBP' => '£',
@@ -43,15 +44,22 @@ class Money implements \Stringable
         
         return new self($priceInPence, $currency);
     }
+
+    protected function in(): static
+    {
+        return $this->{'in' . $this->inFormat}();
+    }
     
     public function inMoney(): static
     {
+        $this->inFormat = 'Money';
         $this->stringable = Str::of(number_format($this->priceInPence / 100, 2));
         return $this;
     }
     
     public function inPence(): static
     {
+        $this->inFormat = 'Pence';
         $this->stringable = Str::of($this->priceInPence);
         return $this;
     }
@@ -69,7 +77,7 @@ class Money implements \Stringable
         $this->priceInPence += $amount instanceof Money
             ? $amount->toPence() : $amount;
         
-        return $this->inMoney();
+        return $this->in();
     }
     
     public function subtract(int|Money $amount): static
@@ -77,21 +85,21 @@ class Money implements \Stringable
         $this->priceInPence -= $amount instanceof Money
             ? $amount->toPence() : $amount;
 
-        return $this->inMoney();
+        return $this->in();
     }
     
     public function times(int $multiplier)
     {
         $this->priceInPence *= $multiplier;
 
-        return $this->inMoney();
+        return $this->in();
     }
     
     public function divide(int $multiplier)
     {
         $this->priceInPence /= $multiplier;
 
-        return $this->inMoney();
+        return $this->in();
     }
     
     public function toPence(): int
