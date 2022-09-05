@@ -7,7 +7,7 @@ use Illuminate\Support\Stringable;
 
 class Money implements \Stringable
 {
-    public Stringable $stringable;
+    private Stringable $stringable;
     
     protected array $symbols = [
         'GBP' => '£',
@@ -69,29 +69,29 @@ class Money implements \Stringable
         $this->priceInPence += $amount instanceof Money
             ? $amount->toPence() : $amount;
         
-        return $this;
+        return $this->inMoney();
     }
     
     public function subtract(int|Money $amount): static
     {
         $this->priceInPence -= $amount instanceof Money
             ? $amount->toPence() : $amount;
-        
-        return $this;
+
+        return $this->inMoney();
     }
     
     public function times(int $multiplier)
     {
         $this->priceInPence *= $multiplier;
-        
-        return $this;
+
+        return $this->inMoney();
     }
     
     public function divide(int $multiplier)
     {
         $this->priceInPence /= $multiplier;
-        
-        return $this;
+
+        return $this->inMoney();
     }
     
     public function toPence(): int
