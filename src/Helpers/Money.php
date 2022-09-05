@@ -49,6 +49,11 @@ class Money implements \Stringable
     {
         return $this->{'in' . $this->inFormat}();
     }
+
+    public function newInstance(): static
+    {
+        return new self($this->toPence(), $this->currency);
+    }
     
     public function inMoney(): static
     {
