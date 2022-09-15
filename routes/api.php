@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Motomedialab\Checkout\Http\Controllers\CheckoutController;
 use Motomedialab\Checkout\Http\Controllers\ProductController;
 
-$route = Route::middleware('api');
+$route = Route::middleware(config('checkout.middleware', ['api']));
 
 if (config('checkout.domain')) {
     $route->domain(config('checkout.domain'));

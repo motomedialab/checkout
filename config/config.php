@@ -26,6 +26,15 @@ return [
     ],
     
     /**
+     * Middleware
+     *
+     * The middleware that should be applied to routes.
+     */
+    'middleware' => [
+        'api',
+    ],
+    
+    /**
      * Models
      *
      * The models to use for various functionality.
