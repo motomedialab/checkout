@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Motomedialab\Checkout\Http\Controllers\CheckoutController;
 use Motomedialab\Checkout\Http\Controllers\ProductController;
+use Motomedialab\Checkout\Http\Controllers\VoucherController;
 
 $route = Route::middleware(config('checkout.middleware', ['api']));
 
@@ -17,4 +18,7 @@ $route->group(function () {
     Route::resource('checkout', CheckoutController::class)
         ->parameter('checkout', 'order')
         ->only('show', 'store', 'update', 'destroy');
+    
+    Route::delete('checkout/{order}/voucher', VoucherController::class)
+        ->name('checkout.voucher.destroy');
 });

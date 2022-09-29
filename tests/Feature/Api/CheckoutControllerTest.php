@@ -223,6 +223,26 @@ class CheckoutControllerTest extends TestCase
     /**
      * @test
      **/
+    function a_voucher_can_be_removed_from_order()
+    {
+        // mock up an order
+        $order = OrderFactory::make('gbp')
+            ->add(Product::factory()->create(['pricing_in_pence' => ['gbp' => 10000]]))
+            ->applyVoucher(Voucher::factory()->create(['value' => 5, 'percentage' => false, 'on_basket' => true]))
+            ->save();
+    
+        $this->assertInstanceOf(Voucher::class, $order->fresh()->voucher);
+        
+        $response = $this->deleteJson(route('checkout.voucher.destroy', $order));
+        
+        $response->assertOk();
+        $this->assertNull($order->fresh()->voucher);
+    
+    }
+    
+    /**
+     * @test
+     **/
     function a_voucher_can_be_removed_from_an_order()
     {
         $voucher = Voucher::factory()->create();

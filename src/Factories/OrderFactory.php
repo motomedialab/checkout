@@ -108,7 +108,7 @@ class OrderFactory
         return $this;
     }
     
-    public function applyVoucher(?Voucher $voucher): static
+    public function applyVoucher(?Voucher $voucher, $throw = false): static
     {
         if (is_null($voucher)) {
             $this->voucher = null;
@@ -125,10 +125,16 @@ class OrderFactory
                 $voucher
             );
             
-            if ($voucherDifference < 0) {
+            if ($voucherDifference < 0 && $throw) {
+                // don't apply a voucher that is worth less
                 throw new InvalidVoucherException(
                     'The voucher you are trying to apply is worth less than your current voucher'
                 );
+            }
+            
+            if ($voucherDifference < 0) {
+                // don't apply a voucher that is worth less
+                return $this;
             }
         }
         
