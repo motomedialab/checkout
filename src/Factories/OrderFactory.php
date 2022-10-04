@@ -121,7 +121,8 @@ class OrderFactory
                 $this->basket,
                 $this->order->currency,
                 $this->voucher,
-                $voucher
+                $voucher,
+                $this->owner
             );
             
             if ($voucherDifference < 0 && $throw) {
