@@ -102,7 +102,7 @@ class OrderFactory
         return $this;
     }
     
-    public function setOwner(CheckoutUser $user): static
+    public function setOwner(?CheckoutUser $user): static
     {
         $this->owner = $user;
         return $this;

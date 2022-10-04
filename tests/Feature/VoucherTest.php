@@ -118,6 +118,30 @@ class VoucherTest extends TestCase
         // the discount should equate to 10% of product 1 + 10% of product 2 (£2.50)
         $this->assertEquals(250, $order->discount_in_pence);
     }
+
+    /**
+     * @test
+     **/
+    function a_quantity_price_voucher_will_apply_to_multiples_of_single_product()
+    {
+        $voucher = Voucher::factory()
+            ->has(Product::factory(['pricing_in_pence' => ['gbp' => 3000]]))
+            ->create([
+                'percentage' => false,
+                'value' => 10, // £10 voucher
+                'on_basket' => false,
+                'quantity_price' => true
+            ]);
+
+        $order = OrderFactory::make('gbp')
+            ->add($voucher->products->first(), 3)
+            ->applyVoucher($voucher)
+            ->save();
+
+        // with 3 products, we'd expect a £30 discount...
+        $this->assertEquals(9000, $order->amount_in_pence);
+        $this->assertEquals(3000, $order->discount_in_pence);
+    }
     
     /**
      * @test

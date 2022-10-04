@@ -16,7 +16,6 @@ use Motomedialab\Checkout\Http\Resources\OrderResource;
 use Motomedialab\Checkout\Models\Order;
 use Motomedialab\Checkout\Models\Product;
 use Motomedialab\Checkout\Models\Voucher;
-use Throwable;
 
 class CheckoutController
 {

@@ -47,9 +47,11 @@ class CalculateDiscountValue implements CalculatesDiscountValue
             // and our voucher must be applicable for the given product
             ->filter(fn(Product $product) => $voucher->products->contains($product))
             // do the math to work out our discount value
-            ->map(fn(Product $product
-            ) => $product->price($currency)->toPence() * ($voucher->quantity_price ? $product->quantity : 1))
-            ->map(fn(int $value) => ($multiplier <= 1 ? $value : 1) * $multiplier)
+            ->map(fn(Product $product) => [
+                'quantity' => $product->quantity,
+                'value' => $product->price($currency)->toPence() * ($voucher->quantity_price ? $product->quantity : 1)
+            ])
+            ->map(fn($result) => ($multiplier <= 1 ? $result['value'] : $result['quantity']) * $multiplier)
             ->sum());
 
         return min($discountValue, $productsValue);
