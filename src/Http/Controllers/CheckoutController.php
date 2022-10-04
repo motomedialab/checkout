@@ -118,6 +118,7 @@ class CheckoutController
             ...$rules,
             'products' => ['nullable', 'array'],
             'products.*.id' => [
+
                 'required',
                 function ($parameter, $value, $fail) {
                     if (null === Product::query()->whereDoesntHave('children')->find($value)) {
@@ -132,6 +133,7 @@ class CheckoutController
                     try {
                         app(ValidatesVoucher::class)(
                             Voucher::findByCode($value),
+                            null,
                             app(CheckoutUser::class)
                         );
                     } catch (ModelNotFoundException) {
