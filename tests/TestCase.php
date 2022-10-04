@@ -2,6 +2,7 @@
 
 namespace Motomedialab\Checkout\Tests;
 
+use Illuminate\Support\Facades\Config;
 use Motomedialab\Checkout\CheckoutServiceProvider;
 
 abstract class TestCase extends \Orchestra\Testbench\TestCase
@@ -13,6 +14,11 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
         $this->artisan('migrate', [
             '--database' => 'sqlite',
             '--realpath' => realpath(__DIR__ .'/../database/migrations'),
+        ]);
+
+        Config::set('auth.guards.api', [
+            'driver' => 'session',
+            'provider' => 'users',
         ]);
     }
     

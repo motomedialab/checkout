@@ -6,8 +6,8 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
+use Motomedialab\Checkout\Contracts\CheckoutUser;
 use Motomedialab\Checkout\Contracts\ValidatesVoucher;
 use Motomedialab\Checkout\Enums\OrderStatus;
 use Motomedialab\Checkout\Exceptions\UnsupportedCurrencyException;
@@ -16,6 +16,7 @@ use Motomedialab\Checkout\Http\Resources\OrderResource;
 use Motomedialab\Checkout\Models\Order;
 use Motomedialab\Checkout\Models\Product;
 use Motomedialab\Checkout\Models\Voucher;
+use Throwable;
 
 class CheckoutController
 {
@@ -35,6 +36,12 @@ class CheckoutController
             
         } catch (UnsupportedCurrencyException $e) {
             throw ValidationException::withMessages(['currency' => 'Sorry, this currency isn\'t supported yet.']);
+        }
+
+        try {
+            $factory->setOwner(app(CheckoutUser::class));
+        } catch (Throwable) {
+            // do nothing.
         }
         
         return $this->createOrUpdate($validated, $factory);
@@ -121,9 +128,12 @@ class CheckoutController
             'products.*.quantity' => ['nullable', 'numeric', 'min:0', 'max:50'],
             'voucher' => [
                 'nullable',
-                function ($key, $value, $fail) {
+                function ($key, $value, $fail) use ($request) {
                     try {
-                        app(ValidatesVoucher::class)(Voucher::findByCode($value));
+                        app(ValidatesVoucher::class)(
+                            Voucher::findByCode($value),
+                            app(CheckoutUser::class)
+                        );
                     } catch (ModelNotFoundException) {
                         $fail('Unknown voucher code');
                     } catch (\Exception $e) {
