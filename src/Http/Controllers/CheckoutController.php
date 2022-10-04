@@ -127,6 +127,7 @@ class CheckoutController
                     try {
                         app(ValidatesVoucher::class)(
                             Voucher::findByCode($value),
+                            null,
                             $request->user(config('checkout.guard'))
                         );
                     } catch (ModelNotFoundException) {
