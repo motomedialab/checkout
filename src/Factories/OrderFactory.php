@@ -22,7 +22,8 @@ class OrderFactory
 {
     protected Collection $basket;
     protected Voucher|null $voucher = null;
-    
+    private CheckoutUser|null $owner = null;
+
     public function __construct(protected Order $order)
     {
         $this->basket = collect();
@@ -103,8 +104,7 @@ class OrderFactory
     
     public function setOwner(CheckoutUser $user): static
     {
-        $this->order->owner()->associate($user);
-        
+        $this->owner = $user;
         return $this;
     }
     
@@ -114,8 +114,7 @@ class OrderFactory
             $this->voucher = null;
             return $this;
         }
-        
-        
+
         if ($this->voucher) {
             
             $voucherDifference = app(ComparesVoucher::class)(
@@ -138,7 +137,7 @@ class OrderFactory
             }
         }
         
-        if (app(ValidatesVoucher::class)($voucher, $this->basket)) {
+        if (app(ValidatesVoucher::class)($voucher, $this->basket, $this->owner)) {
             $this->voucher = $voucher;
         }
         
@@ -158,13 +157,17 @@ class OrderFactory
             'vat_rate' => config('checkout.default_vat_rate'),
             'amount_in_pence' => app(CalculatesProductsValue::class)($this->basket, $this->order->currency),
             'shipping_in_pence' => app(CalculatesProductsShipping::class)($this->basket, $this->order->currency),
-            'discount_in_pence' => $this->voucher
-                ? app(CalculatesDiscountValue::class)($this->basket, $this->voucher, $this->order->currency)
-                : 0,
+            'discount_in_pence' => app(CalculatesDiscountValue::class)(
+                $this->basket,
+                $this->voucher,
+                $this->order->currency,
+                $this->owner
+            )
         ]);
         
         $this->order->setStatus($status);
         $this->order->voucher()->associate($this->voucher);
+        $this->order->owner()->associate($this->owner);
         
         $this->order->products()->sync(
             $this->basket->mapWithKeys(function (Product $product, int $key) {

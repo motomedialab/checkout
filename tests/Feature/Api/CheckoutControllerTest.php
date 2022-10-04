@@ -117,7 +117,7 @@ class CheckoutControllerTest extends TestCase
             'value' => 10,
         ]); // 10 GBP voucher.
         
-        $response = $this->putJson(route('checkout.update', $order), [
+        $this->putJson(route('checkout.update', $order), [
             'voucher' => $voucher->code
         ])->assertStatus(200)
             ->assertJson(['data' => ['voucher' => $voucher->code]]);
@@ -126,7 +126,32 @@ class CheckoutControllerTest extends TestCase
     /**
      * @test
      **/
-    function a_voucher_of_a_lesser_value_throws_error()
+    function a_voucher_value_is_persisted_after_purchase()
+    {
+        $voucher = Voucher::factory()
+            ->has(Product::factory(['pricing_in_pence' => ['gbp' => 4000]]))
+                ->create([
+                'on_basket' => false,
+                'percentage' => false,
+                'value' => 10,
+            ]); // 10 GBP voucher.
+
+
+        $order = OrderFactory::make('gbp')
+            ->applyVoucher($voucher)
+            ->add($voucher->products->first())->save();
+
+        $this->assertEquals(1000, $order->discount_in_pence);
+
+        $order = OrderFactory::fromExisting($order)->save(OrderStatus::AWAITING_PAYMENT);
+
+        $this->assertEquals(1000, $order->discount_in_pence);
+    }
+    
+    /**
+     * @test
+     **/
+    function a_voucher_of_a_lesser_value_is_not_applied()
     {
         // create an order
         $product = Product::factory()->create();
@@ -137,11 +162,11 @@ class CheckoutControllerTest extends TestCase
         // create a lesser valued voucher
         $voucher = Voucher::factory()->create(['on_basket' => true,'percentage' => false,'value' => 3]);
         
-        // and try to apply it...
+        // try to apply it and check it wasn't applied.
         $this
             ->putJson(route('checkout.update', $order), ['voucher' => $voucher->code])
-            ->assertStatus(400)
-            ->assertJsonPath('message', 'The voucher you are trying to apply is worth less than your current voucher');
+            ->assertStatus(200)
+            ->assertJson(['data' => ['totals' => ['discount_in_pence' => 1000]]]);
     }
     
     /**

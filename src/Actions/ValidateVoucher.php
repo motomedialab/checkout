@@ -3,6 +3,7 @@
 namespace Motomedialab\Checkout\Actions;
 
 use Illuminate\Support\Collection;
+use Motomedialab\Checkout\Contracts\CheckoutUser;
 use Motomedialab\Checkout\Contracts\ValidatesVoucher;
 use Motomedialab\Checkout\Exceptions\InvalidVoucherException;
 use Motomedialab\Checkout\Exceptions\VoucherNotApplicableException;
@@ -10,7 +11,7 @@ use Motomedialab\Checkout\Models\Voucher;
 
 class ValidateVoucher implements ValidatesVoucher
 {
-    public function __invoke(Voucher $voucher, ?Collection $products = null): bool
+    public function __invoke(Voucher $voucher, ?Collection $products = null, ?CheckoutUser $owner = null): bool
     {
         if (true === $voucher->valid_from?->gt(now())) {
             throw new InvalidVoucherException('This voucher is not yet valid');
