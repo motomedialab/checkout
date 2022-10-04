@@ -37,12 +37,6 @@ class CheckoutController
         } catch (UnsupportedCurrencyException $e) {
             throw ValidationException::withMessages(['currency' => 'Sorry, this currency isn\'t supported yet.']);
         }
-
-        try {
-            $factory->setOwner(app(CheckoutUser::class));
-        } catch (Throwable) {
-            // do nothing.
-        }
         
         return $this->createOrUpdate($validated, $factory);
     }
@@ -86,6 +80,8 @@ class CheckoutController
      */
     protected function createOrUpdate(array $validated, OrderFactory $factory): OrderResource
     {
+        $factory->setOwner(app(CheckoutUser::class));
+
         $this->products($validated['products'] ?? [])
             ->each(fn(Product $product) => $factory->add(
                 $product,
@@ -118,7 +114,6 @@ class CheckoutController
             ...$rules,
             'products' => ['nullable', 'array'],
             'products.*.id' => [
-
                 'required',
                 function ($parameter, $value, $fail) {
                     if (null === Product::query()->whereDoesntHave('children')->find($value)) {
@@ -133,8 +128,7 @@ class CheckoutController
                     try {
                         app(ValidatesVoucher::class)(
                             Voucher::findByCode($value),
-                            null,
-                            app(CheckoutUser::class)
+                            $request->user(config('checkout.guard'))
                         );
                     } catch (ModelNotFoundException) {
                         $fail('Unknown voucher code');

@@ -12,6 +12,7 @@ use Illuminate\Support\Str;
 use Motomedialab\Checkout\Contracts\CalculatesDiscountValue;
 use Motomedialab\Checkout\Contracts\CalculatesProductsShipping;
 use Motomedialab\Checkout\Contracts\CalculatesProductsValue;
+use Motomedialab\Checkout\Contracts\CheckoutUser;
 use Motomedialab\Checkout\Contracts\ValidatesVoucher;
 use Motomedialab\Checkout\Enums\OrderStatus;
 use Motomedialab\Checkout\Events\OrderStatusUpdated;
@@ -21,6 +22,7 @@ use Motomedialab\Checkout\Models\Pivots\OrderPivot;
 
 /**
  * @property OrderStatus $status
+ * @property CheckoutUser $owner
  * @property string $currency
  * @property string $uuid
  * @property array $recipient_address
@@ -124,7 +126,11 @@ class Order extends Model
     public function confirm(): static
     {
         if ($this->voucher) {
-            app(ValidatesVoucher::class)($this->voucher);
+            app(ValidatesVoucher::class)(
+                $this->voucher,
+                $this->products,
+                $this->owner,
+            );
         }
         
         $this->setStatus(OrderStatus::AWAITING_PAYMENT);
@@ -173,7 +179,12 @@ class Order extends Model
         return new Attribute(
             get: fn($value) => (int) $this->hasBeenSubmitted() || !$this->voucher
                 ? $value
-                : app(CalculatesDiscountValue::class)($this->products, $this->voucher, $this->currency)
+                : app(CalculatesDiscountValue::class)(
+                    $this->products,
+                    $this->voucher,
+                    $this->currency,
+                    $this->owner
+                )
         );
     }
     
