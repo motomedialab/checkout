@@ -46,6 +46,11 @@ class CalculateDiscountValue implements CalculatesDiscountValue
             ->when(!$voucher->quantity_price, fn(Collection $collection) => $collection->unique('id'))
             // and our voucher must be applicable for the given product
             ->filter(fn(Product $product) => $voucher->products->contains($product))
+            // make sure we have at least 1 quantity
+            ->map(fn(Product $product) => tap(
+                $product,
+                fn(Product $product) => $product->quantity = $product->quantity < 1 ? 1 : $product->quantity)
+            )
             // do the math to work out our discount value
             ->map(fn(Product $product) => [
                 'quantity' => $product->quantity,
