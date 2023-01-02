@@ -6,8 +6,8 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
+use Motomedialab\Checkout\Contracts\CheckoutUser;
 use Motomedialab\Checkout\Contracts\ValidatesVoucher;
 use Motomedialab\Checkout\Enums\OrderStatus;
 use Motomedialab\Checkout\Exceptions\UnsupportedCurrencyException;
@@ -79,6 +79,8 @@ class CheckoutController
      */
     protected function createOrUpdate(array $validated, OrderFactory $factory): OrderResource
     {
+        $factory->setOwner(app(CheckoutUser::class));
+
         $this->products($validated['products'] ?? [])
             ->each(fn(Product $product) => $factory->add(
                 $product,
@@ -121,9 +123,13 @@ class CheckoutController
             'products.*.quantity' => ['nullable', 'numeric', 'min:0', 'max:50'],
             'voucher' => [
                 'nullable',
-                function ($key, $value, $fail) {
+                function ($key, $value, $fail) use ($request) {
                     try {
-                        app(ValidatesVoucher::class)(Voucher::findByCode($value));
+                        app(ValidatesVoucher::class)(
+                            Voucher::findByCode($value),
+                            null,
+                            $request->user(config('checkout.guard'))
+                        );
                     } catch (ModelNotFoundException) {
                         $fail('Unknown voucher code');
                     } catch (\Exception $e) {

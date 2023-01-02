@@ -33,6 +33,13 @@ return [
     'middleware' => [
         'api',
     ],
+
+    /**
+     * Guard
+     *
+     * The authentication guard under which routes are protected.
+     */
+    'guard' => 'api',
     
     /**
      * Models

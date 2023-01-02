@@ -36,7 +36,12 @@ class ProductResource extends JsonResource
             'available' => $this->resource->status === ProductStatus::AVAILABLE,
             'discount_in_pence' => $this->when(
                 $voucher instanceof Voucher,
-                fn() => app(CalculatesDiscountValue::class)(collect([$this->resource]), $voucher, $currency)
+                fn() => app(CalculatesDiscountValue::class)(
+                    collect([$this->resource]),
+                    $voucher,
+                    $currency,
+                    $request->user(config('checkout.guard'))
+                )
             ),
             'pricing' => VatCalculator::make(
                 $this->resource->price($currency)?->toPence(),

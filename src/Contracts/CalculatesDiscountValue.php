@@ -11,5 +11,5 @@ use Motomedialab\Checkout\Models\Voucher;
 
 interface CalculatesDiscountValue
 {
-    public function __invoke(Collection $products, Voucher $voucher, string $currency): int;
+    public function __invoke(Collection $products, ?Voucher $voucher, string $currency, ?CheckoutUser $owner = null): int;
 }

@@ -2,6 +2,8 @@
 
 namespace Motomedialab\Checkout;
 
+use Illuminate\Foundation\Application;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Motomedialab\Checkout\Actions\CalculateDiscountValue;
@@ -13,6 +15,7 @@ use Motomedialab\Checkout\Console\PurgeHistoricOrders;
 use Motomedialab\Checkout\Contracts\CalculatesDiscountValue;
 use Motomedialab\Checkout\Contracts\CalculatesProductsShipping;
 use Motomedialab\Checkout\Contracts\CalculatesProductsValue;
+use Motomedialab\Checkout\Contracts\CheckoutUser;
 use Motomedialab\Checkout\Contracts\ComparesVoucher;
 use Motomedialab\Checkout\Contracts\ValidatesVoucher;
 use Motomedialab\Checkout\Models\Order;
@@ -51,6 +54,15 @@ class CheckoutServiceProvider extends ServiceProvider
         // Register the main class to use with the facade
         $this->app->singleton('checkout', function () {
             return new Checkout;
+        });
+
+        $this->app->bind(CheckoutUser::class, function ($app) {
+            /** @var Request $request */
+            $request = $app->request;
+
+            $user = $request->user(config('checkout.guard', 'api'));
+
+            return $user instanceof CheckoutUser ? $user : null;
         });
         
         // action pattern

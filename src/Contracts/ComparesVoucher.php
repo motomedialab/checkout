@@ -11,6 +11,12 @@ use Motomedialab\Checkout\Models\Voucher;
  */
 interface ComparesVoucher
 {
-    public function __invoke(Collection $products, string $currency, Voucher $oldVoucher, Voucher $newVoucher);
-    
+    public function __invoke(
+        Collection $products,
+        string $currency,
+        Voucher $oldVoucher,
+        Voucher $newVoucher,
+        ?CheckoutUser $owner
+    );
+
 }

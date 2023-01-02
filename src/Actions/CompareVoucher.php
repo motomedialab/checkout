@@ -4,19 +4,24 @@ namespace Motomedialab\Checkout\Actions;
 
 use Illuminate\Support\Collection;
 use Motomedialab\Checkout\Contracts\CalculatesDiscountValue;
+use Motomedialab\Checkout\Contracts\CheckoutUser;
 use Motomedialab\Checkout\Contracts\ComparesVoucher;
 use Motomedialab\Checkout\Models\Voucher;
 
 class CompareVoucher implements ComparesVoucher
 {
-    
-    public function __invoke(Collection $products, string $currency, Voucher $oldVoucher, Voucher $newVoucher)
-    {
-        // if both vouchers are on the basket, which offers the better discount...
-        
-        $oldValue = app(CalculatesDiscountValue::class)($products, $oldVoucher, $currency);
-        $newValue = app(CalculatesDiscountValue::class)($products, $newVoucher, $currency);
-        
-        return $newValue - $oldValue;
+
+    public function __invoke(
+        Collection $products,
+        string $currency,
+        Voucher $oldVoucher,
+        Voucher $newVoucher,
+        ?CheckoutUser $owner
+    ) {
+        /** @var CalculatesDiscountValue $discountService */
+        $discountService = app(CalculatesDiscountValue::class);
+
+        return $discountService($products, $newVoucher, $currency, $owner)
+            - $discountService($products, $oldVoucher, $currency, $owner);
     }
 }
