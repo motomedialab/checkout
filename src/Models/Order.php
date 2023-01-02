@@ -156,7 +156,9 @@ class Order extends Model
     
     protected function currencySymbol(): Attribute
     {
-        return config("checkout.currencies.{$this->currency}", '£');
+        return new Attribute(
+            get: fn() => config("checkout.currencies.{$this->currency}", '£')
+        );
     }
     
     protected function amountInPence(): Attribute
