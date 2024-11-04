@@ -42,6 +42,11 @@ class Product extends Model
     protected $casts = [
         'status' => ProductStatus::class,
     ];
+
+    protected $attribute = [
+        'pricing' => '[]',
+        'shipping' => '[]',
+    ];
     
     protected $with = ['parent'];
     
