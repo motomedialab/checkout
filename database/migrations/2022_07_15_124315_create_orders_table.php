@@ -20,7 +20,7 @@ return new class extends Migration {
             
             $table->nullableMorphs('owner');
             
-            $table->json('recipient_address')->default('{}');
+            $table->json('recipient_address');
             
             $table->string('currency')->default('GBP');
             $table->string('status', 20)->default(OrderStatus::PENDING->value);
