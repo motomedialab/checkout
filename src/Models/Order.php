@@ -51,6 +51,10 @@ class Order extends Model
         'currency',
         'status',
     ];
+
+    protected $attributes = [
+        'recipient_address' => '[]',
+    ];
     
     public function __construct(array $attributes = [])
     {
