@@ -180,7 +180,7 @@ class CheckoutControllerTest extends TestCase
     function a_pending_order_can_be_updated()
     {
         $product = Product::factory()->create();
-        $order = OrderFactory::make('gbp')->add($product, 1)->save();
+        $order = OrderFactory::make('gbp')->add($product)->save();
 
         $response = $this->putJson(route('checkout.update', ['order' => $order->uuid]), [
             'increment' => true,

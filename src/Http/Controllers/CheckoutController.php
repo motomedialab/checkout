@@ -170,6 +170,7 @@ class CheckoutController
 
             $product->setAttribute('metadata',
                 $productCollection->firstWhere('id', $product->getKey())['metadata'] ?? null);
+
             return $product;
         });
     }
