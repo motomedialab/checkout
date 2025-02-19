@@ -36,10 +36,16 @@ class CheckoutControllerTest extends TestCase
     {
         $product = Product::factory()->create();
 
+        $metadata = [
+            'vehicle_details' => 'Triumph Daytona',
+            'vehicle_registration' => 'LR14TUU',
+            'dealer_id' => 1
+        ];
+
         $response = $this->postJson(route('checkout.store'), [
             'currency' => 'gbp',
             'products' => [
-                ['id' => $product->getKey(), 'quantity' => 3],
+                ['id' => $product->getKey(), 'quantity' => 3, 'metadata' => $metadata],
             ],
         ]);
 
@@ -59,6 +65,7 @@ class CheckoutControllerTest extends TestCase
         $this->assertEquals(OrderStatus::PENDING, $order->status);
         $this->assertEquals(3, $response->json('data.products.0.quantity'));
         $this->assertEquals($product->getKey(), $response->json('data.products.0.id'));
+        $this->assertEquals($metadata, $response->json('data.products.0.metadata'));
     }
 
     /**
@@ -173,7 +180,7 @@ class CheckoutControllerTest extends TestCase
     function a_pending_order_can_be_updated()
     {
         $product = Product::factory()->create();
-        $order = OrderFactory::make('gbp')->add($product, 1)->save();
+        $order = OrderFactory::make('gbp')->add($product)->save();
 
         $response = $this->putJson(route('checkout.update', ['order' => $order->uuid]), [
             'increment' => true,

@@ -47,6 +47,7 @@ class ProductResource extends JsonResource
                 $this->resource->price($currency)?->toPence(),
                 $this->resource->vat_rate
             ),
+            'metadata' => $this->resource->orderPivot?->metadata,
             'children' => static::collection($this->whenLoaded('children')),
             'parent' => $this->whenLoaded('parent', fn() => static::make($this->resource->parent)),
         ]);

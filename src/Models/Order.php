@@ -94,7 +94,7 @@ class Order extends Model
     public function products(): BelongsToMany
     {
         return $this->belongsToMany(Product::class, config('checkout.tables.order_product'))
-            ->withPivot(['quantity', 'amount_in_pence', 'vat_rate'])
+            ->withPivot(['quantity', 'amount_in_pence', 'vat_rate', 'metadata'])
             ->as('orderPivot')
             ->using(OrderPivot::class);
     }

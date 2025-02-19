@@ -16,9 +16,15 @@ use Motomedialab\Checkout\Models\Order;
  * @property int $shipping_in_pence
  * @property int $quantity
  * @property float $vat_rate
+ * @property array $metadata
  */
 class OrderPivot extends Pivot
 {
+    protected $casts = [
+        'quantity' => 'integer',
+        'metadata' => 'array'
+    ];
+
     protected function order(): Attribute
     {
         return new Attribute(get: fn() => $this->pivotParent);
