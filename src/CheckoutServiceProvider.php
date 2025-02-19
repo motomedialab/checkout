@@ -9,12 +9,14 @@ use Illuminate\Support\ServiceProvider;
 use Motomedialab\Checkout\Actions\CalculateDiscountValue;
 use Motomedialab\Checkout\Actions\CalculateProductsShipping;
 use Motomedialab\Checkout\Actions\CalculateProductsValue;
+use Motomedialab\Checkout\Actions\CalculateProductsVat;
 use Motomedialab\Checkout\Actions\CompareVoucher;
 use Motomedialab\Checkout\Actions\ValidateVoucher;
 use Motomedialab\Checkout\Console\PurgeHistoricOrders;
 use Motomedialab\Checkout\Contracts\CalculatesDiscountValue;
 use Motomedialab\Checkout\Contracts\CalculatesProductsShipping;
 use Motomedialab\Checkout\Contracts\CalculatesProductsValue;
+use Motomedialab\Checkout\Contracts\CalculatesProductsVat;
 use Motomedialab\Checkout\Contracts\CheckoutUser;
 use Motomedialab\Checkout\Contracts\ComparesVoucher;
 use Motomedialab\Checkout\Contracts\ValidatesVoucher;
@@ -68,6 +70,7 @@ class CheckoutServiceProvider extends ServiceProvider
         // action pattern
         $this->app->bind(ComparesVoucher::class, CompareVoucher::class);
         $this->app->bind(ValidatesVoucher::class, ValidateVoucher::class);
+        $this->app->bind(CalculatesProductsVat::class, CalculateProductsVat::class);
         $this->app->bind(CalculatesDiscountValue::class, CalculateDiscountValue::class);
         $this->app->bind(CalculatesProductsValue::class, CalculateProductsValue::class);
         $this->app->bind(CalculatesProductsShipping::class, CalculateProductsShipping::class);

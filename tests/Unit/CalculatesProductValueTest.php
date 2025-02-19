@@ -2,12 +2,14 @@
 
 namespace Motomedialab\Checkout\Tests\Unit;
 
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Motomedialab\Checkout\Contracts\CalculatesProductsValue;
 use Motomedialab\Checkout\Models\Product;
 use Motomedialab\Checkout\Tests\TestCase;
 
 class CalculatesProductValueTest extends TestCase
 {
+    use LazilyRefreshDatabase;
     
     /**
      * @test
