@@ -63,7 +63,7 @@ class OrderFactory
         return new static($order);
     }
     
-    public function add(Product $product, int $quantity = 1, bool $increment = false): static
+    public function add(Product $product, int $quantity = 1, bool $increment = false, array $metadata = []): static
     {
         if (!$product->availableInCurrency($this->order->currency)) {
             throw new CheckoutException($product->name.' is not available in the requested currency');
@@ -75,7 +75,9 @@ class OrderFactory
         
         $product->quantity = ($increment ? $this->basket->firstWhere('id',
                 $product->getKey())?->quantity : 0) + $quantity;
-        
+
+        $product->metadata = $metadata;
+
         // should this item be removed from the basket?
         if ($product->quantity === 0 && false === $increment) {
             $this->remove($product);
@@ -169,7 +171,7 @@ class OrderFactory
         $this->order->setStatus($status);
         $this->order->voucher()->associate($this->voucher);
         $this->order->owner()->associate($this->owner);
-        
+
         $this->order->products()->sync(
             $this->basket->mapWithKeys(function (Product $product, int $key) {
                 return [
@@ -177,13 +179,14 @@ class OrderFactory
                         'quantity' => $product->quantity,
                         'amount_in_pence' => $product->price($this->order->currency)->toPence(),
                         'vat_rate' => $product->vat_rate,
+                        'metadata' => $product->metadata,
                     ]
                 ];
             })->toArray()
         );
-        
+
         $this->order->save();
-        
+
         return $this->order->refresh();
     }
     

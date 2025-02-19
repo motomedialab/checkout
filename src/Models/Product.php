@@ -23,6 +23,7 @@ use Motomedialab\Checkout\Models\Pivots\OrderPivot;
  * @property int $quantity A temporary store for basket quantity
  * @property ProductStatus $status
  * @property ?OrderPivot $orderPivot
+ * @property array $metadata a temporary store for metadata
  */
 class Product extends Model
 {
@@ -38,7 +39,9 @@ class Product extends Model
      * @var int
      */
     protected int $quantityHolder = 0;
-    
+
+    protected array $metadataHolder = [];
+
     protected $casts = [
         'status' => ProductStatus::class,
     ];
@@ -165,6 +168,14 @@ class Product extends Model
         return new Attribute(
             get: fn($value) => $this->orderPivot?->quantity ?? $this->quantityHolder,
             set: fn($value) => $this->quantityHolder = (int)$value
+        );
+    }
+
+    protected function metadata(): Attribute
+    {
+        return new Attribute(
+            get: fn($value) => $this->orderPivot?->metadata ?? $this->metadataHolder,
+            set: fn($value) => $this->metadataHolder = (array) $value
         );
     }
     

@@ -2,11 +2,14 @@
 
 namespace Motomedialab\Checkout\Tests;
 
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\Config;
 use Motomedialab\Checkout\CheckoutServiceProvider;
 
 abstract class TestCase extends \Orchestra\Testbench\TestCase
 {
+    use LazilyRefreshDatabase;
+
     protected function setUp(): void
     {
         parent::setUp();
