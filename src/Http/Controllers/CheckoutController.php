@@ -36,7 +36,7 @@ class CheckoutController
         } catch (UnsupportedCurrencyException $e) {
             throw ValidationException::withMessages(['currency' => 'Sorry, this currency isn\'t supported yet.']);
         }
-        
+
         return $this->createOrUpdate($validated, $factory);
     }
     
@@ -85,9 +85,10 @@ class CheckoutController
             ->each(fn(Product $product) => $factory->add(
                 $product,
                 $product->quantity,
-                $validated['increment'] ?? true
+                $validated['increment'] ?? true,
+                $product->metadata
             ));
-        
+
         if (array_key_exists('voucher', $validated)) {
             $factory->applyVoucher(
                 is_null($validated['voucher'])
@@ -121,6 +122,7 @@ class CheckoutController
                 }
             ],
             'products.*.quantity' => ['nullable', 'numeric', 'min:0', 'max:50'],
+            'products.*.metadata' => ['nullable', 'array'],
             'voucher' => [
                 'nullable',
                 function ($key, $value, $fail) use ($request) {
@@ -165,6 +167,9 @@ class CheckoutController
         return $products->map(function (Product $product) use ($productCollection) {
             $product->setAttribute('quantity',
                 $productCollection->firstWhere('id', $product->getKey())['quantity'] ?? 1);
+
+            $product->setAttribute('metadata',
+                $productCollection->firstWhere('id', $product->getKey())['metadata'] ?? null);
             return $product;
         });
     }
