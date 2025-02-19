@@ -13,10 +13,10 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         $this->artisan('migrate', [
             '--database' => 'sqlite',
-            '--realpath' => realpath(__DIR__ .'/../database/migrations'),
+            '--realpath' => realpath(__DIR__ . '/../database/migrations'),
         ]);
 
         Config::set('auth.guards.api', [
@@ -24,7 +24,7 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
             'provider' => 'users',
         ]);
     }
-    
+
     protected function getPackageProviders($app): array
     {
         return [
