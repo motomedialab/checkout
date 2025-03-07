@@ -23,58 +23,50 @@ class CheckoutController
     {
         return OrderResource::make($order);
     }
-    
+
     public function store(Request $request): OrderResource
     {
         $validated = $this->validate($request, ['currency' => ['required', 'string', 'min:3', 'max:3']]);
-        
+
         try {
             $factory = OrderFactory::make(
                 $validated['currency'] ?? config('checkout.default_currency')
             );
-            
+
         } catch (UnsupportedCurrencyException $e) {
             throw ValidationException::withMessages(['currency' => 'Sorry, this currency isn\'t supported yet.']);
         }
 
         return $this->createOrUpdate($validated, $factory);
     }
-    
+
     public function update(Request $request, Order $order): OrderResource
     {
         if ($order->status->gt(OrderStatus::PENDING)) {
             abort(403, 'You cannot update an order that is no longer pending');
         }
-        
+
         $validated = $this->validate($request, [
             'increment' => ['nullable', 'boolean'],
         ]);
-        
+
         return $this->createOrUpdate($validated, OrderFactory::fromExisting($order));
     }
-    
+
     /**
      * Delete an entire basket.
-     *
-     * @param  Request  $request
-     * @param  Order  $order
-     *
-     * @return JsonResponse
      */
     public function destroy(Request $request, Order $order): JsonResponse
     {
         $order->delete();
-        
+
         return response()->json(['success' => true], 204);
     }
-    
+
     /**
      * Create or update an order based on an order factory instance.
      *
-     * @param  array  $validated
-     * @param  OrderFactory  $factory
      *
-     * @return OrderResource
      * @throws \Exception
      */
     protected function createOrUpdate(array $validated, OrderFactory $factory): OrderResource
@@ -82,7 +74,7 @@ class CheckoutController
         $factory->setOwner(app(CheckoutUser::class));
 
         $this->products($validated['products'] ?? [])
-            ->each(fn(Product $product) => $factory->add(
+            ->each(fn (Product $product) => $factory->add(
                 $product,
                 $product->quantity,
                 $validated['increment'] ?? true,
@@ -96,17 +88,14 @@ class CheckoutController
                     : Voucher::findByCode($validated['voucher'])
             );
         }
-        
+
         return OrderResource::make($factory->save());
     }
-    
+
     /**
      * Validate the inbound request data.
      *
-     * @param  Request  $request
      * @param  array  $rules  Additional rules to be supplied
-     *
-     * @return array
      */
     protected function validate(Request $request, array $rules = []): array
     {
@@ -116,10 +105,10 @@ class CheckoutController
             'products.*.id' => [
                 'required',
                 function ($parameter, $value, $fail) {
-                    if (null === Product::query()->whereDoesntHave('children')->find($value)) {
+                    if (Product::query()->whereDoesntHave('children')->find($value) === null) {
                         $fail('The product you were looking for could not be found');
                     }
-                }
+                },
             ],
             'products.*.quantity' => ['nullable', 'numeric', 'min:0', 'max:50'],
             'products.*.metadata' => ['nullable', 'array'],
@@ -137,33 +126,32 @@ class CheckoutController
                     } catch (\Exception $e) {
                         $fail($e->getMessage());
                     }
-                }
-            ]
+                },
+            ],
         ], [
             'products.*.id.*' => 'Unknown product ID',
         ]);
     }
-    
+
     /**
      * Return a collection of products based on the request.
      *
-     * @param  array  $products
      *
      * @return Collection
      */
     protected function products(array $products): \Illuminate\Support\Collection
     {
         $productCollection = collect($products);
-        
+
         if ($productCollection->isEmpty()) {
             return collect();
         }
-        
+
         $products = Product::query()->whereIn(
             'id',
-            $productCollection->map(fn($value) => $value['id'])
+            $productCollection->map(fn ($value) => $value['id'])
         )->get();
-        
+
         return $products->map(function (Product $product) use ($productCollection) {
             $product->setAttribute('quantity',
                 $productCollection->firstWhere('id', $product->getKey())['quantity'] ?? 1);

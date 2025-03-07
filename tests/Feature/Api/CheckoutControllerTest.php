@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @author MotoMediaLab <hello@motomedialab.com>
  * Created at: 20/07/2022
@@ -15,11 +16,10 @@ use Motomedialab\Checkout\Tests\TestCase;
 
 class CheckoutControllerTest extends TestCase
 {
-
     /**
      * @test
      **/
-    function checkout_store_requires_existing_product()
+    public function checkout_store_requires_existing_product()
     {
         $this->postJson(route('checkout.store'), [
             'currency' => 'gbp',
@@ -32,14 +32,14 @@ class CheckoutControllerTest extends TestCase
     /**
      * @test
      **/
-    function an_order_can_be_created()
+    public function an_order_can_be_created()
     {
         $product = Product::factory()->create();
 
         $metadata = [
             'vehicle_details' => 'Triumph Daytona',
             'vehicle_registration' => 'LR14TUU',
-            'dealer_id' => 1
+            'dealer_id' => 1,
         ];
 
         $response = $this->postJson(route('checkout.store'), [
@@ -71,7 +71,7 @@ class CheckoutControllerTest extends TestCase
     /**
      * @test
      **/
-    function a_product_with_children_cannot_be_ordered()
+    public function a_product_with_children_cannot_be_ordered()
     {
         // create a parent product that has one child
         $product = Product::factory()->create();
@@ -90,8 +90,71 @@ class CheckoutControllerTest extends TestCase
 
     /**
      * @test
+     */
+    public function additional_products_can_be_added()
+    {
+        $product = Product::factory()->create();
+
+        $uuid = $this->postJson(route('checkout.store'), [
+            'currency' => 'gbp',
+            'products' => [
+                [
+                    'id' => $product->getKey(),
+                    'quantity' => 1,
+                ],
+            ],
+        ])->assertSuccessful()->json('data.id');
+
+        $response = $this->patch(route('checkout.update', ['order' => $uuid]), [
+            'products' => [
+                [
+                    'id' => Product::factory()->create()->getKey(),
+                    'quantity' => 1,
+                ],
+            ],
+        ])->assertSuccessful();
+
+        $this->assertCount(2, $response->json('data.products'));
+    }
+
+    public function test_metadata_is_persisted()
+    {
+        $product = Product::factory()->create();
+
+        $order = $this->postJson(route('checkout.store'), [
+            'currency' => 'gbp',
+            'products' => [
+                [
+                    'id' => $product->getKey(),
+                    'quantity' => 1,
+                    'metadata' => [
+                        'testing' => 'value',
+                    ],
+                ],
+            ],
+        ])->assertSuccessful()->json('data.id');
+
+        $res = $this->patchJson(route('checkout.update', $order), [
+            'increment' => true,
+            'products' => [
+                [
+                    'id' => $product->getKey(),
+                    'quantity' => 4,
+                ],
+            ],
+        ]);
+
+        $this->assertEquals([
+            'testing' => 'value',
+        ], $res->json('data.products.0.metadata'));
+
+        $this->assertEquals(5, $res->json('data.products.0.quantity'));
+    }
+
+    /**
+     * @test
      **/
-    function setting_a_quantity_to_zero_without_increment_removes_it()
+    public function setting_a_quantity_to_zero_without_increment_removes_it()
     {
         $product = Product::factory()->create();
         $order = OrderFactory::make('gbp')->add($product, 1)->save();
@@ -112,7 +175,7 @@ class CheckoutControllerTest extends TestCase
     /**
      * @test
      **/
-    function a_voucher_can_be_applied_to_an_existing_order()
+    public function a_voucher_can_be_applied_to_an_existing_order()
     {
         $product = Product::factory()->create();
         $order = OrderFactory::make('gbp')->add($product, 1)->save();
@@ -131,7 +194,7 @@ class CheckoutControllerTest extends TestCase
     /**
      * @test
      **/
-    function a_voucher_value_is_persisted_after_purchase()
+    public function a_voucher_value_is_persisted_after_purchase()
     {
         $voucher = Voucher::factory()
             ->has(Product::factory(['pricing_in_pence' => ['gbp' => 4000]]))
@@ -140,7 +203,6 @@ class CheckoutControllerTest extends TestCase
                 'percentage' => false,
                 'value' => 10,
             ]); // 10 GBP voucher.
-
 
         $order = OrderFactory::make('gbp')
             ->applyVoucher($voucher)
@@ -156,12 +218,12 @@ class CheckoutControllerTest extends TestCase
     /**
      * @test
      **/
-    function a_voucher_of_a_lesser_value_is_not_applied()
+    public function a_voucher_of_a_lesser_value_is_not_applied()
     {
         // create an order
         $product = Product::factory()->create();
         $order = OrderFactory::make('gbp')->add($product, 1)
-            ->applyVoucher(Voucher::factory()->create(['on_basket' => true, 'percentage' => false, 'value' => 10,]))
+            ->applyVoucher(Voucher::factory()->create(['on_basket' => true, 'percentage' => false, 'value' => 10]))
             ->save();
 
         // create a lesser valued voucher
@@ -177,7 +239,7 @@ class CheckoutControllerTest extends TestCase
     /**
      * @test
      **/
-    function a_pending_order_can_be_updated()
+    public function a_pending_order_can_be_updated()
     {
         $product = Product::factory()->create();
         $order = OrderFactory::make('gbp')->add($product)->save();
@@ -208,7 +270,7 @@ class CheckoutControllerTest extends TestCase
     /**
      * @test
      **/
-    function a_pending_order_can_be_deleted()
+    public function a_pending_order_can_be_deleted()
     {
         $order = OrderFactory::make('gbp')->save();
 
@@ -221,9 +283,8 @@ class CheckoutControllerTest extends TestCase
     /**
      * @test
      **/
-    function a_voucher_can_be_added_to_order()
+    public function a_voucher_can_be_added_to_order()
     {
-
         $product = Product::factory()->create([
             'pricing_in_pence' => ['gbp' => 10000], // make the product £10
             'shipping_in_pence' => [],
@@ -253,7 +314,7 @@ class CheckoutControllerTest extends TestCase
     /**
      * @test
      **/
-    function a_voucher_can_be_removed_from_order()
+    public function a_voucher_can_be_removed_from_order()
     {
         // mock up an order
         $order = OrderFactory::make('gbp')
@@ -273,7 +334,7 @@ class CheckoutControllerTest extends TestCase
     /**
      * @test
      **/
-    function a_voucher_can_be_removed_from_an_order()
+    public function a_voucher_can_be_removed_from_an_order()
     {
         $voucher = Voucher::factory()->create();
         $order = OrderFactory::make('gbp')->applyVoucher($voucher)->save();
@@ -287,7 +348,7 @@ class CheckoutControllerTest extends TestCase
     /**
      * @test
      **/
-    function an_active_order_cannot_be_updated()
+    public function an_active_order_cannot_be_updated()
     {
         $product = Product::factory()->create();
         $order = OrderFactory::make('gbp')->add($product, 1)->save();
@@ -300,7 +361,7 @@ class CheckoutControllerTest extends TestCase
     /**
      * @test
      **/
-    function a_voucher_exception_returns_to_browser()
+    public function a_voucher_exception_returns_to_browser()
     {
         $response = $this->postJson(route('checkout.store'), [
             'currency' => 'gbp',
@@ -310,5 +371,4 @@ class CheckoutControllerTest extends TestCase
         $response->assertStatus(422);
         $this->assertEquals('Unknown voucher code', $response->json('errors.voucher.0'));
     }
-
 }

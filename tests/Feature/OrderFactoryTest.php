@@ -2,7 +2,6 @@
 
 namespace Motomedialab\Checkout\Tests\Feature;
 
-use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Motomedialab\Checkout\Enums\OrderStatus;
 use Motomedialab\Checkout\Enums\ProductStatus;
 use Motomedialab\Checkout\Factories\OrderFactory;
@@ -15,7 +14,7 @@ class OrderFactoryTest extends TestCase
     /**
      * @test
      **/
-    function a_new_order_can_be_created()
+    public function a_new_order_can_be_created()
     {
         $product = Product::factory()->create([
             'pricing_in_pence' => [
@@ -23,7 +22,7 @@ class OrderFactoryTest extends TestCase
             ],
             'shipping_in_pence' => [
                 'gbp' => 200,
-            ]
+            ],
         ]);
 
         $order = OrderFactory::make('gbp')->add($product, 2);
@@ -39,7 +38,7 @@ class OrderFactoryTest extends TestCase
     /**
      * @test
      **/
-    function an_existing_order_can_be_retrieved()
+    public function an_existing_order_can_be_retrieved()
     {
         // seed our previous order
         $order = OrderFactory::make('gbp')
@@ -62,7 +61,7 @@ class OrderFactoryTest extends TestCase
     /**
      * @test
      **/
-    function an_unavailable_product_cannot_be_added()
+    public function an_unavailable_product_cannot_be_added()
     {
         $this->expectException(\Exception::class);
 
@@ -75,7 +74,7 @@ class OrderFactoryTest extends TestCase
     /**
      * @test
      **/
-    function an_address_can_be_set()
+    public function an_address_can_be_set()
     {
         $address = [
             'address_line_1' => 'Just testing',
@@ -90,7 +89,7 @@ class OrderFactoryTest extends TestCase
     /**
      * @test
      **/
-    function products_can_be_incremented()
+    public function products_can_be_incremented()
     {
         $product = Product::factory()->create();
 
@@ -106,12 +105,12 @@ class OrderFactoryTest extends TestCase
     /**
      * @test
      */
-    function metadata_can_be_added_to_order_products()
+    public function metadata_can_be_added_to_order_products()
     {
         $metadata = [
             'vehicle_details' => 'Triumph Daytona',
             'vehicle_registration' => 'LR14TUU',
-            'dealer_id' => 1
+            'dealer_id' => 1,
         ];
 
         $product = Product::factory()->create();
