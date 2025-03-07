@@ -13,13 +13,13 @@ class ProductController
         $request->validate([
             'currency' => [
                 'required', function ($key, $value, $fail) use ($product) {
-                    if (!$product->availableInCurrency($value)) {
+                    if (! $product->availableInCurrency($value)) {
                         $fail('Sorry, this product is not available in this currency');
                     }
-                }
+                },
             ],
         ]);
-        
+
         return ProductResource::make($product->load('children'));
     }
 }

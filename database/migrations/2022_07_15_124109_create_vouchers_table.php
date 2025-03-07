@@ -15,26 +15,26 @@ return new class extends Migration
     {
         Schema::create(config('checkout.tables.vouchers'), function (Blueprint $table) {
             $table->id();
-            
+
             $table->string('code');
-            
+
             $table->integer('max_uses')->default(0);
             $table->integer('total_uses')->default(0);
-            
+
             $table->dateTime('valid_from')->nullable()->default(null);
             $table->dateTime('valid_until')->nullable()->default(null);
-            
+
             $table->float('value');
-            
+
             // true is percentage, false is fixed value
             $table->boolean('percentage')->default(false);
-            
+
             // true is apply against entire basket, false is against defined products
             $table->boolean('on_basket')->default(false);
-            
+
             // true is apply to the total quantity, false is apply to one item
             $table->boolean('quantity_price')->default(true);
-            
+
             $table->timestamps();
             $table->softDeletes();
         });

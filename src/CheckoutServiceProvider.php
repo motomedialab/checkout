@@ -18,7 +18,6 @@ use Motomedialab\Checkout\Contracts\CalculatesProductsValue;
 use Motomedialab\Checkout\Contracts\CheckoutUser;
 use Motomedialab\Checkout\Contracts\ComparesVoucher;
 use Motomedialab\Checkout\Contracts\ValidatesVoucher;
-use Motomedialab\Checkout\Models\Order;
 
 class CheckoutServiceProvider extends ServiceProvider
 {
@@ -28,21 +27,21 @@ class CheckoutServiceProvider extends ServiceProvider
     public function boot()
     {
         $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
-        
+
         $this->loadRoutesFrom(__DIR__.'/../routes/api.php');
-        
+
         if ($this->app->runningInConsole()) {
             $this->publishes([
                 __DIR__.'/../config/config.php' => config_path('checkout.php'),
             ], 'config');
         }
-        
+
         // initialise commands
         $this->commands(PurgeHistoricOrders::class);
-        
+
         $this->setupRouteModelBindings();
     }
-    
+
     /**
      * Register the application services.
      */
@@ -50,7 +49,7 @@ class CheckoutServiceProvider extends ServiceProvider
     {
         // Automatically apply the package configuration
         $this->mergeConfigFrom(__DIR__.'/../config/config.php', 'checkout');
-        
+
         // Register the main class to use with the facade
         $this->app->singleton('checkout', function () {
             return new Checkout;
@@ -64,7 +63,7 @@ class CheckoutServiceProvider extends ServiceProvider
 
             return $user instanceof CheckoutUser ? $user : null;
         });
-        
+
         // action pattern
         $this->app->bind(ComparesVoucher::class, CompareVoucher::class);
         $this->app->bind(ValidatesVoucher::class, ValidateVoucher::class);
@@ -72,10 +71,10 @@ class CheckoutServiceProvider extends ServiceProvider
         $this->app->bind(CalculatesProductsValue::class, CalculateProductsValue::class);
         $this->app->bind(CalculatesProductsShipping::class, CalculateProductsShipping::class);
     }
-    
+
     protected function setupRouteModelBindings()
     {
-        Route::bind('order', fn(string $uuid) => config('checkout.models.order')::query()
+        Route::bind('order', fn (string $uuid) => config('checkout.models.order')::query()
             ->with(['products', 'voucher'])
             ->where('uuid', $uuid)
             ->firstOrFail());

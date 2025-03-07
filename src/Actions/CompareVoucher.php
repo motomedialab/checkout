@@ -10,7 +10,6 @@ use Motomedialab\Checkout\Models\Voucher;
 
 class CompareVoucher implements ComparesVoucher
 {
-
     public function __invoke(
         Collection $products,
         string $currency,

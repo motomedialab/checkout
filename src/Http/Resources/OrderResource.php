@@ -24,7 +24,7 @@ class OrderResource extends JsonResource
                 'amount_in_pence' => $this->resource->amount->toPence(),
                 'shipping_in_pence' => $this->resource->shipping->toPence(),
                 'discount_in_pence' => $this->resource->discount->toPence(),
-                'total_in_pence' => $this->resource->total->toPence()
+                'total_in_pence' => $this->resource->total->toPence(),
             ],
         ];
     }

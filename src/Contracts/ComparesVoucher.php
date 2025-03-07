@@ -18,5 +18,4 @@ interface ComparesVoucher
         Voucher $newVoucher,
         ?CheckoutUser $owner
     );
-
 }

@@ -16,7 +16,7 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
 
         $this->artisan('migrate', [
             '--database' => 'sqlite',
-            '--realpath' => realpath(__DIR__ . '/../database/migrations'),
+            '--realpath' => realpath(__DIR__.'/../database/migrations'),
         ]);
 
         Config::set('auth.guards.api', [

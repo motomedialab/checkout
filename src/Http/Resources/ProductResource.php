@@ -19,14 +19,14 @@ class ProductResource extends JsonResource
     {
         $currency = $this->resource->orderPivot?->order->currency
             ?? strtoupper($request->get('currency', config('checkout.default_currency')));
-        
+
         try {
             $voucher = $this->resource->orderPivot?->order->voucher
                 ?? ($request->has('voucher') ? Voucher::findByCode($request->get('voucher')) : null);
         } catch (ModelNotFoundException $e) {
             $voucher = null;
         }
-        
+
         return array_filter([
             'id' => $this->resource->getKey(),
             'name' => $this->resource->name,
@@ -36,7 +36,7 @@ class ProductResource extends JsonResource
             'available' => $this->resource->status === ProductStatus::AVAILABLE,
             'discount_in_pence' => $this->when(
                 $voucher instanceof Voucher,
-                fn() => app(CalculatesDiscountValue::class)(
+                fn () => app(CalculatesDiscountValue::class)(
                     collect([$this->resource]),
                     $voucher,
                     $currency,
@@ -49,7 +49,7 @@ class ProductResource extends JsonResource
             ),
             'metadata' => $this->resource->orderPivot?->metadata,
             'children' => static::collection($this->whenLoaded('children')),
-            'parent' => $this->whenLoaded('parent', fn() => static::make($this->resource->parent)),
+            'parent' => $this->whenLoaded('parent', fn () => static::make($this->resource->parent)),
         ]);
     }
 }

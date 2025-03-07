@@ -8,7 +8,7 @@ use Motomedialab\Checkout\Models\Product;
 class ProductFactory extends Factory
 {
     protected $model = Product::class;
-    
+
     public function definition(): array
     {
         return [
@@ -21,8 +21,7 @@ class ProductFactory extends Factory
             'shipping_in_pence' => [
                 'gbp' => $this->faker->numberBetween(50, 1000),
                 'eur' => $this->faker->numberBetween(50, 1000),
-            ]
+            ],
         ];
     }
 }
-

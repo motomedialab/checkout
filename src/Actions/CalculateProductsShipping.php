@@ -8,11 +8,10 @@ use Motomedialab\Checkout\Models\Product;
 
 class CalculateProductsShipping implements CalculatesProductsShipping
 {
-    
     public function __invoke(Collection $products, string $currency)
     {
         return $products
-                ->map(fn(Product $product) => $product->shipping($currency)?->toPence() ?? 0)
-                ->max() ?? 0;
+            ->map(fn (Product $product) => $product->shipping($currency)?->toPence() ?? 0)
+            ->max() ?? 0;
     }
 }

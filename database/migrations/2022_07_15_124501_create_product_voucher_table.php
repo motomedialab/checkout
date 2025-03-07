@@ -15,10 +15,10 @@ return new class extends Migration
     {
         Schema::create(config('checkout.tables.product_voucher'), function (Blueprint $table) {
             $table->id();
-            
+
             $table->foreignId('product_id')->nullable()
                 ->references('id')->on(config('checkout.tables.products'))->nullOnDelete();
-    
+
             $table->foreignId('voucher_id')->nullable()
                 ->references('id')->on(config('checkout.tables.vouchers'))->nullOnDelete();
         });

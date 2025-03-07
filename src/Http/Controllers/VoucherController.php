@@ -11,9 +11,9 @@ class VoucherController
     public function __invoke(Order $order): OrderResource
     {
         $factory = OrderFactory::fromExisting($order);
-        
+
         $factory->removeVoucher();
-    
+
         return OrderResource::make($factory->save());
     }
 }

@@ -4,14 +4,14 @@
  * You can place your custom package configuration in here.
  */
 return [
-    
+
     /**
      * Domain name
      *
      * Restrict API to a certain domain / domains
      */
     'domain' => null,
-    
+
     /**
      * Table names
      *
@@ -24,7 +24,7 @@ return [
         'order_product' => 'checkout_order_product',
         'product_voucher' => 'checkout_product_voucher',
     ],
-    
+
     /**
      * Middleware
      *
@@ -40,7 +40,7 @@ return [
      * The authentication guard under which routes are protected.
      */
     'guard' => 'api',
-    
+
     /**
      * Models
      *
@@ -49,7 +49,7 @@ return [
     'models' => [
         'order' => Motomedialab\Checkout\Models\Order::class,
     ],
-    
+
     /**
      * Currencies
      *
@@ -60,14 +60,14 @@ return [
         'GBP' => '£',
         'EUR' => '€',
     ],
-    
+
     /**
      * Default currency
      *
      * The default currency that should be used
      */
     'default_currency' => 'GBP',
-    
+
     /**
      * Default VAT rate
      *

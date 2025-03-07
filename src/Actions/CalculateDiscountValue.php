@@ -13,7 +13,6 @@ use Motomedialab\Checkout\Models\Voucher;
 
 class CalculateDiscountValue implements CalculatesDiscountValue
 {
-
     public function __invoke(
         Collection $products,
         ?Voucher $voucher,
@@ -43,20 +42,20 @@ class CalculateDiscountValue implements CalculatesDiscountValue
         // discount against products
         $discountValue = ceil($products
             // if we're not accounting for quantity, we only need distinct products
-            ->when(!$voucher->quantity_price, fn(Collection $collection) => $collection->unique('id'))
+            ->when(! $voucher->quantity_price, fn (Collection $collection) => $collection->unique('id'))
             // and our voucher must be applicable for the given product
-            ->filter(fn(Product $product) => $voucher->products->contains($product))
+            ->filter(fn (Product $product) => $voucher->products->contains($product))
             // make sure we have at least 1 quantity
-            ->map(fn(Product $product) => tap(
+            ->map(fn (Product $product) => tap(
                 $product,
-                fn(Product $product) => $product->quantity = $product->quantity < 1 ? 1 : $product->quantity)
+                fn (Product $product) => $product->quantity = $product->quantity < 1 ? 1 : $product->quantity)
             )
             // do the math to work out our discount value
-            ->map(fn(Product $product) => [
+            ->map(fn (Product $product) => [
                 'quantity' => $product->quantity,
-                'value' => $product->price($currency)->toPence() * ($voucher->quantity_price ? $product->quantity : 1)
+                'value' => $product->price($currency)->toPence() * ($voucher->quantity_price ? $product->quantity : 1),
             ])
-            ->map(fn($result) => ($multiplier <= 1 ? $result['value'] : $result['quantity']) * $multiplier)
+            ->map(fn ($result) => ($multiplier <= 1 ? $result['value'] : $result['quantity']) * $multiplier)
             ->sum());
 
         return min($discountValue, $productsValue);

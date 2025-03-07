@@ -15,15 +15,15 @@ return new class extends Migration
     {
         Schema::create(config('checkout.tables.order_product'), function (Blueprint $table) {
             $table->id();
-            
+
             $table->foreignId('product_id')->nullable()
                 ->references('id')->on(config('checkout.tables.products'))->nullOnDelete();
-    
+
             $table->foreignId('order_id')->nullable()
                 ->references('id')->on(config('checkout.tables.orders'))->nullOnDelete();
-            
+
             $table->unsignedInteger('quantity');
-            
+
             $table->integer('amount_in_pence');
             $table->float('vat_rate');
         });

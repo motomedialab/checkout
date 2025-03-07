@@ -23,9 +23,9 @@ use Illuminate\Support\Carbon;
  */
 class Voucher extends Model
 {
-    use SoftDeletes;
     use HasFactory;
-    
+    use SoftDeletes;
+
     protected $casts = [
         'quantity_price' => 'boolean',
         'on_basket' => 'boolean',
@@ -33,19 +33,19 @@ class Voucher extends Model
         'valid_from' => 'date',
         'valid_until' => 'date',
     ];
-    
+
     public function __construct(array $attributes = [])
     {
         parent::__construct($attributes);
-        
+
         $this->setTable(config('checkout.tables.vouchers'));
     }
-    
+
     public static function findByCode(string $code): static
     {
         return Voucher::query()->where('code', $code)->firstOrFail();
     }
-    
+
     public function products(): BelongsToMany
     {
         return $this->belongsToMany(Product::class, config('checkout.tables.product_voucher'));

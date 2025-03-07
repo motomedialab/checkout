@@ -1,18 +1,16 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
     protected string $table;
-    
+
     public function __construct()
     {
         $this->table = config('checkout.tables.products');
     }
-    
+
     /**
      * Run the migrations.
      *
