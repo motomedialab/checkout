@@ -153,11 +153,15 @@ class CheckoutController
         )->get();
 
         return $products->map(function (Product $product) use ($productCollection) {
-            $product->setAttribute('quantity',
-                $productCollection->firstWhere('id', $product->getKey())['quantity'] ?? 1);
+            $product->setAttribute(
+                'quantity',
+                $productCollection->firstWhere('id', $product->getKey())['quantity'] ?? 1
+            );
 
-            $product->setAttribute('metadata',
-                $productCollection->firstWhere('id', $product->getKey())['metadata'] ?? null);
+            $product->setAttribute(
+                'metadata',
+                $productCollection->firstWhere('id', $product->getKey())['metadata'] ?? null
+            );
 
             return $product;
         });

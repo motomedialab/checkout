@@ -10,7 +10,7 @@ enum OrderStatus: string
     case AWAITING_PAYMENT = 'awaiting_payment';
     case CANCELLED = 'cancelled';
 
-    const PRIORITY_MAP = [
+    public const PRIORITY_MAP = [
         'pending' => 0,
         'awaiting_payment' => 5,
         'paid' => 10,

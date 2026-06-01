@@ -49,7 +49,7 @@ class OrderFactory
         $currency = strtoupper($currency);
 
         if (! array_key_exists($currency, config('checkout.currencies'))) {
-            throw new UnsupportedCurrencyException;
+            throw new UnsupportedCurrencyException();
         }
 
         return new static(new Order([
@@ -73,8 +73,10 @@ class OrderFactory
             throw new CheckoutException($product->name.' is not available for purchase');
         }
 
-        $product->quantity = ($increment ? $this->basket->firstWhere('id',
-            $product->getKey())?->quantity : 0) + $quantity;
+        $product->quantity = ($increment ? $this->basket->firstWhere(
+            'id',
+            $product->getKey()
+        )?->quantity : 0) + $quantity;
 
         $product->metadata = $metadata;
 

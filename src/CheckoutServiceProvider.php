@@ -52,7 +52,7 @@ class CheckoutServiceProvider extends ServiceProvider
 
         // Register the main class to use with the facade
         $this->app->singleton('checkout', function () {
-            return new Checkout;
+            return new Checkout();
         });
 
         $this->app->bind(CheckoutUser::class, function ($app) {
